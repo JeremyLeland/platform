@@ -1,0 +1,61 @@
+<title>Draw some tiles</title>
+<link rel="stylesheet" href="../style.css">
+
+<script type="module">
+
+import { Canvas } from '../src/common/Canvas.js';
+
+const canvas = new Canvas();
+canvas.backgroundColor = 'dodgerblue';
+canvas.zoom = 1 / 10;
+canvas.scrollX = -5;
+canvas.scrollY = -5;
+
+canvas.draw = ( ctx ) => {
+  ctx.lineWidth = 0.002 / canvas.zoom;
+
+  drawTile( ctx, 3, 2 );
+
+  ctx.strokeStyle = '#ccca';
+  ctx.setLineDash( [ 0.1, 0.1 ] );
+  ctx.stroke( getGrid( -4, -4, 4, 4 ) );
+}
+
+function drawTile( ctx, cols, rows ) {
+  
+  const dirtPath = new Path2D();
+  dirtPath.rect( -0.5, -0.5, cols, rows );
+  ctx.fillStyle = 'tan';
+  ctx.fill( dirtPath );
+  ctx.strokeStyle = 'black';
+  ctx.stroke( dirtPath );
+
+  const GRASS_OFFSET = 0.1;
+  const GRASS_HEIGHT = 0.3;
+
+  const grassPath = new Path2D();
+  grassPath.rect( -0.5 - GRASS_OFFSET, -0.5, cols + GRASS_OFFSET * 2, GRASS_HEIGHT );
+
+  ctx.fillStyle = 'lime';
+  ctx.fill( grassPath );
+  ctx.strokeStyle = 'black';
+  ctx.stroke( grassPath );
+}
+
+function getGrid( minX, minY, maxX, maxY ) {
+  const grid = new Path2D();
+
+  for ( let col = minX; col <= maxX + 1; col ++ ) {
+    grid.moveTo( col - 0.5, minY - 0.5 );
+    grid.lineTo( col - 0.5, maxY + 0.5 );
+  }
+
+  for ( let row = minY; row <= maxY + 1; row ++ ) {
+    grid.moveTo( minX - 0.5, row - 0.5 );
+    grid.lineTo( maxX + 0.5, row - 0.5 );
+  }
+
+  return grid;
+}
+
+</script>
