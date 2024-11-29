@@ -14,27 +14,45 @@ canvas.scrollY = -5;
 canvas.draw = ( ctx ) => {
   ctx.lineWidth = 0.002 / canvas.zoom;
 
+  ctx.translate( -0.5, -0.5 );
+
   drawTile( ctx, 3, 2 );
 
   ctx.strokeStyle = '#ccca';
   ctx.setLineDash( [ 0.1, 0.1 ] );
   ctx.stroke( getGrid( -4, -4, 4, 4 ) );
+
+  ctx.translate( 0.5, 0.5 );
 }
 
 function drawTile( ctx, cols, rows ) {
   
   const dirtPath = new Path2D();
-  dirtPath.rect( -0.5, -0.5, cols, rows );
+  dirtPath.rect( 0, 0, cols, rows );
   ctx.fillStyle = 'tan';
   ctx.fill( dirtPath );
   ctx.strokeStyle = 'black';
   ctx.stroke( dirtPath );
 
   const GRASS_OFFSET = 0.1;
-  const GRASS_HEIGHT = 0.3;
+  const GRASS_HEIGHT = [ 0.2, 0.3 ];
 
   const grassPath = new Path2D();
-  grassPath.rect( -0.5 - GRASS_OFFSET, -0.5, cols + GRASS_OFFSET * 2, GRASS_HEIGHT );
+
+  grassPath.moveTo( -GRASS_OFFSET, 0 );
+  grassPath.lineTo( -GRASS_OFFSET, GRASS_HEIGHT[ 1 ] );
+
+  const GRASS_PER_TILE = 10;
+
+  for ( let x = 0, ndx = 0; x <= cols * GRASS_PER_TILE; x ++, ndx = ( ndx + 1 ) % 2 ) {
+    grassPath.lineTo( x / GRASS_PER_TILE, GRASS_HEIGHT[ ndx ] );
+  }
+
+  grassPath.lineTo( cols + GRASS_OFFSET, GRASS_HEIGHT[ 1 ] );
+  grassPath.lineTo( cols + GRASS_OFFSET, 0 );
+
+  grassPath.closePath();
+
 
   ctx.fillStyle = 'lime';
   ctx.fill( grassPath );
@@ -46,13 +64,13 @@ function getGrid( minX, minY, maxX, maxY ) {
   const grid = new Path2D();
 
   for ( let col = minX; col <= maxX + 1; col ++ ) {
-    grid.moveTo( col - 0.5, minY - 0.5 );
-    grid.lineTo( col - 0.5, maxY + 0.5 );
+    grid.moveTo( col, minY );
+    grid.lineTo( col, maxY + 1 );
   }
 
   for ( let row = minY; row <= maxY + 1; row ++ ) {
-    grid.moveTo( minX - 0.5, row - 0.5 );
-    grid.lineTo( maxX + 0.5, row - 0.5 );
+    grid.moveTo( minX, row );
+    grid.lineTo( maxX + 1, row );
   }
 
   return grid;
