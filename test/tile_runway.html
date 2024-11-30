@@ -13,61 +13,107 @@ canvas.scrollY = -5;
 
 const tiles = [
   [ 2, -2, 4, -2 ],
+  [ -4, -2, -2, -2 ],
   [ -2, 2, 2, 4 ],
   [ 1, 3, 4, 4 ],
   [ -4, 4, -1, 4 ],
-  [ 0, 0, 0, 0 ],
+  // [ 0, 0, 0, 0 ],
 ];
+
+let time = 0;
+
+canvas.update = ( dt ) => {
+  time += dt;
+}
 
 canvas.draw = ( ctx ) => {
   ctx.lineWidth = 0.002 / canvas.zoom;
 
   ctx.translate( -0.5, -0.5 );
 
+  drawWater( ctx, -1, -2, 1, -2 );
+
   tiles.forEach( tile => {
     drawTile( ctx, ...tile );
   } );
 
+
   ctx.strokeStyle = '#ccca';
-  ctx.setLineDash( [ 0.1, 0.1 ] );
-  ctx.stroke( getGrid( -4, -4, 4, 4 ) );
+
+  // Make it look like:
+  // + - - +
+  // |     |
+  // |     |
+  // + - - +
+  ctx.setLineDash( [ 0.1, 0.2, 0.1, 0.2, 0.1, 0.2, 0.1, 0 ] );
+  // ctx.stroke( getGrid( -4, -4, 4, 4 ) );
 
   ctx.translate( 0.5, 0.5 );
 }
 
+canvas.start();
+
 function drawTile( ctx, startCol, startRow, endCol, endRow ) {
   
-  const dirtPath = new Path2D();
-  dirtPath.rect( startCol, startRow, 1 + endCol - startCol, 1 + endRow - startRow );
+  const dirt = new Path2D();
+  dirt.rect( startCol, startRow, 1 + endCol - startCol, 1 + endRow - startRow );
   ctx.fillStyle = 'tan';
-  ctx.fill( dirtPath );
+  ctx.fill( dirt );
   ctx.strokeStyle = 'black';
-  ctx.stroke( dirtPath );
+  ctx.stroke( dirt );
 
   const GRASS_OFFSET = 0.1;
   const GRASS_HEIGHT = [ 0.2, 0.3 ];
 
-  const grassPath = new Path2D();
+  const grass = new Path2D();
 
-  grassPath.moveTo( startCol - GRASS_OFFSET, startRow );
-  grassPath.lineTo( startCol - GRASS_OFFSET, startRow + GRASS_HEIGHT[ 1 ] );
+  grass.moveTo( startCol - GRASS_OFFSET, startRow );
+  grass.lineTo( startCol - GRASS_OFFSET, startRow + GRASS_HEIGHT[ 1 ] );
 
   const GRASS_PER_TILE = 10;
 
   for ( let x = 0, ndx = 0; x <= ( 1 + endCol - startCol ) * GRASS_PER_TILE; x ++, ndx = ( ndx + 1 ) % 2 ) {
-    grassPath.lineTo( startCol + x / GRASS_PER_TILE, startRow + GRASS_HEIGHT[ ndx ] );
+    grass.lineTo( startCol + x / GRASS_PER_TILE, startRow + GRASS_HEIGHT[ ndx ] );
   }
 
-  grassPath.lineTo( 1 + endCol + GRASS_OFFSET, startRow + GRASS_HEIGHT[ 1 ] );
-  grassPath.lineTo( 1 + endCol + GRASS_OFFSET, startRow );
+  grass.lineTo( 1 + endCol + GRASS_OFFSET, startRow + GRASS_HEIGHT[ 1 ] );
+  grass.lineTo( 1 + endCol + GRASS_OFFSET, startRow );
 
-  grassPath.closePath();
+  grass.closePath();
 
 
   ctx.fillStyle = 'lime';
-  ctx.fill( grassPath );
+  ctx.fill( grass );
   ctx.strokeStyle = 'black';
-  ctx.stroke( grassPath );
+  ctx.stroke( grass );
+}
+
+function drawWater( ctx, startCol, startRow, endCol, endRow ) {
+  const WAVE_CREST = 0.1;
+  const WAVES_PER_TILE = 3;
+  const WAVE_SIZE = 1 / WAVES_PER_TILE;
+
+  const water = new Path2D();
+
+  water.moveTo( startCol, endRow + 1 );
+  water.lineTo( startCol, startRow + WAVE_CREST );
+
+  const offset = ( time / 4000 ) % WAVE_SIZE;
+  const crest = WAVE_CREST * ( 1.5 + 0.5 * Math.sin( time / 500 ) ); 
+
+  for ( let x = 0, ndx = 0; x <= ( 1 + endCol - startCol ) * WAVES_PER_TILE; x ++, ndx = ( ndx + 1 ) % 2 ) {
+    water.arc( startCol + offset - WAVE_SIZE / 2 + x / WAVES_PER_TILE, startRow + crest, WAVE_SIZE / 2, Math.PI, 0, true /* counter-clockwise */ );
+  }
+
+  water.lineTo( 1 + endCol, startRow + WAVE_CREST );
+  water.lineTo( 1 + endCol, endRow + 1);
+
+  water.closePath();
+
+  ctx.fillStyle = 'blue';
+  ctx.fill( water );
+  ctx.strokeStyle = 'black';
+  ctx.stroke( water );
 }
 
 function getGrid( minX, minY, maxX, maxY ) {
