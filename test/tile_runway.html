@@ -11,17 +11,22 @@ canvas.zoom = 1 / 10;
 canvas.scrollX = -5;
 canvas.scrollY = -5;
 
+const tiles = [
+  [ 2, -2, 4, -2 ],
+  [ -2, 2, 2, 4 ],
+  [ 1, 3, 4, 4 ],
+  [ -4, 4, -1, 4 ],
+  [ 0, 0, 0, 0 ],
+];
+
 canvas.draw = ( ctx ) => {
   ctx.lineWidth = 0.002 / canvas.zoom;
 
   ctx.translate( -0.5, -0.5 );
 
-  drawTile( ctx, 2, -2, 4, -2 );
-
-  drawTile( ctx, -2, 2, 2, 4 );
-  drawTile( ctx, 1, 3, 4, 4 );
-  drawTile( ctx, -4, 4, -1, 4 );
-  drawTile( ctx, 0, 0, 0, 0 );
+  tiles.forEach( tile => {
+    drawTile( ctx, ...tile );
+  } );
 
   ctx.strokeStyle = '#ccca';
   ctx.setLineDash( [ 0.1, 0.1 ] );
