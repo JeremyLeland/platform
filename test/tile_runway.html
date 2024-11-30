@@ -16,7 +16,12 @@ canvas.draw = ( ctx ) => {
 
   ctx.translate( -0.5, -0.5 );
 
-  drawTile( ctx, 3, 2 );
+  drawTile( ctx, 2, -2, 4, -2 );
+
+  drawTile( ctx, -2, 2, 2, 4 );
+  drawTile( ctx, 1, 3, 4, 4 );
+  drawTile( ctx, -4, 4, -1, 4 );
+  drawTile( ctx, 0, 0, 0, 0 );
 
   ctx.strokeStyle = '#ccca';
   ctx.setLineDash( [ 0.1, 0.1 ] );
@@ -25,10 +30,10 @@ canvas.draw = ( ctx ) => {
   ctx.translate( 0.5, 0.5 );
 }
 
-function drawTile( ctx, cols, rows ) {
+function drawTile( ctx, startCol, startRow, endCol, endRow ) {
   
   const dirtPath = new Path2D();
-  dirtPath.rect( 0, 0, cols, rows );
+  dirtPath.rect( startCol, startRow, 1 + endCol - startCol, 1 + endRow - startRow );
   ctx.fillStyle = 'tan';
   ctx.fill( dirtPath );
   ctx.strokeStyle = 'black';
@@ -39,17 +44,17 @@ function drawTile( ctx, cols, rows ) {
 
   const grassPath = new Path2D();
 
-  grassPath.moveTo( -GRASS_OFFSET, 0 );
-  grassPath.lineTo( -GRASS_OFFSET, GRASS_HEIGHT[ 1 ] );
+  grassPath.moveTo( startCol - GRASS_OFFSET, startRow );
+  grassPath.lineTo( startCol - GRASS_OFFSET, startRow + GRASS_HEIGHT[ 1 ] );
 
   const GRASS_PER_TILE = 10;
 
-  for ( let x = 0, ndx = 0; x <= cols * GRASS_PER_TILE; x ++, ndx = ( ndx + 1 ) % 2 ) {
-    grassPath.lineTo( x / GRASS_PER_TILE, GRASS_HEIGHT[ ndx ] );
+  for ( let x = 0, ndx = 0; x <= ( 1 + endCol - startCol ) * GRASS_PER_TILE; x ++, ndx = ( ndx + 1 ) % 2 ) {
+    grassPath.lineTo( startCol + x / GRASS_PER_TILE, startRow + GRASS_HEIGHT[ ndx ] );
   }
 
-  grassPath.lineTo( cols + GRASS_OFFSET, GRASS_HEIGHT[ 1 ] );
-  grassPath.lineTo( cols + GRASS_OFFSET, 0 );
+  grassPath.lineTo( 1 + endCol + GRASS_OFFSET, startRow + GRASS_HEIGHT[ 1 ] );
+  grassPath.lineTo( 1 + endCol + GRASS_OFFSET, startRow );
 
   grassPath.closePath();
 
