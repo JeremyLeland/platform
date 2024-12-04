@@ -28,6 +28,9 @@
       },
       undoStack: [],
       selectedIndex: -1,
+      options: {
+        grid: true,
+      }
     }
   }
 
@@ -67,25 +70,78 @@
       ctx.fillStyle = '#fffa';
       ctx.fillRect( bounds[ 0 ], bounds[ 1 ], bounds[ 2 ] + 1 - bounds[ 0 ], bounds[ 3 ] + 1 - bounds[ 1 ] );
     }
+    
+    if ( editorState.options.grid ) {
+      // Make it look like:
+      // + - - +
+      // |     |
+      // |     |
+      // + - - +
+      ctx.setLineDash( [ 0.1, 0.2, 0.1, 0.2, 0.1, 0.2, 0.1, 0 ] );
+      ctx.strokeStyle = '#ccca';
+      ctx.stroke( getGrid( -4, -4, 4, 4 ) );
+    }
+  }
+
+
+  function getGrid( minX, minY, maxX, maxY ) {
+    const grid = new Path2D();
+
+    for ( let col = minX; col <= maxX + 1; col ++ ) {
+      grid.moveTo( col, minY );
+      grid.lineTo( col, maxY + 1 );
+    }
+
+    for ( let row = minY; row <= maxY + 1; row ++ ) {
+      grid.moveTo( minX, row );
+      grid.lineTo( maxX + 1, row );
+    }
+
+    return grid;
   }
 
   //
   // Input
   //
 
+  function applyCommand( cmd ) {
+    Level.applyCommand( editorState.level, cmd );
+  }
+
+  function addBlock( x, y ) {
+    const nextIndex = editorState.level.blocks.length;
+
+    applyCommand( {
+      type: 'AddBlock',
+      index: nextIndex,
+      block: {
+        type: 'grass',
+        bounds: [ x, y, x, y ],
+      },
+    } );
+
+    editorState.selectedIndex = nextIndex;
+  }
+
+  function deleteBlock() {
+    applyCommand( {
+      type: 'DeleteBlock',
+      index: editorState.selectedIndex,
+    } );
+
+    editorState.selectedIndex = -1;
+  }
+
   function reorderBlock( dIndex ) {
     if ( editorState.selectedIndex >= 0 ) {
       const nextIndex = editorState.selectedIndex + dIndex;
 
       if ( 0 <= nextIndex && nextIndex < editorState.level.blocks.length ) {
-        Level.applyCommand(
-          editorState.level,
-          {
-            type: 'ReorderBlock',
-            index: editorState.selectedIndex,
-            dIndex: dIndex,
-          }
-        );
+        applyCommand( {
+          type: 'ReorderBlock',
+          index: editorState.selectedIndex,
+          dIndex: dIndex,
+        } );
 
         editorState.selectedIndex = nextIndex;
       }
@@ -94,24 +150,26 @@
     canvas.redraw();
   }
 
-  function deleteBlock() {
-    Level.applyCommand(
-      editorState.level,
-      {
-        type: 'DeleteBlock',
-        index: editorState.selectedIndex,
-      }
-    );
-
-    editorState.selectedIndex = -1;
-  }
-
   canvas.pointerDown = ( p ) => {
     if ( p.buttons == 1 ) {
-      editorState.selectedIndex = editorState.level.blocks.findLastIndex( block => 
+      const underPointerIndex = editorState.level.blocks.findLastIndex( block => 
         block.bounds[ 0 ] <= p.x && p.x <= block.bounds[ 2 ] + 1 &&
         block.bounds[ 1 ] <= p.y && p.y <= block.bounds[ 3 ] + 1
       );
+
+      // If we click in an empty spot, deselect first. 
+      // If no selection, add a block here
+      if ( underPointerIndex == -1 ) {
+        if ( editorState.selectedIndex == -1 ) {
+          addBlock( Math.floor( p.x ), Math.floor( p.y ) );
+        }
+        else {
+          editorState.selectedIndex = -1;
+        }
+      }
+      else {
+        editorState.selectedIndex = underPointerIndex;
+      }
     }
 
     canvas.redraw();
@@ -139,6 +197,10 @@
       }
 
       e.preventDefault();
+    }
+
+    if ( e.key == 'g' ) {
+      editorState.options.grid = !editorState.options.grid;
     }
 
     if ( e.key == 'Delete' || e.key == 'Backspace' ) {
@@ -174,14 +236,11 @@
         return;
       }
 
-      Level.applyCommand( 
-        editorState.level, 
-        { 
-          type: 'ChangeBlockBounds', 
-          index: editorState.selectedIndex,
-          dBounds: dBounds,
-        }
-      );
+      applyCommand( { 
+        type: 'ChangeBlockBounds', 
+        index: editorState.selectedIndex,
+        dBounds: dBounds,
+      } );
     }
 
     canvas.redraw();
