@@ -1,0 +1,227 @@
+<title>Draw some tiles</title>
+<link rel="stylesheet" href="../style.css">
+
+<script type="module">
+
+import { Canvas } from '../src/common/Canvas.js';
+
+const canvas = new Canvas();
+canvas.backgroundColor = 'dodgerblue';
+canvas.zoom = 1 / 10;
+canvas.scrollX = -5;
+canvas.scrollY = -5;
+
+const tiles = [
+  { 
+    type: 'grass', 
+    bounds: [  2, -2,  4, -1 ], 
+    waypoints: [
+      {
+        offset: [ 0, 1 ],
+        time: 2000,
+      },
+      {
+        offset: [ 0, 0 ],
+        time: 4000,
+      },
+    ] 
+  },
+  { 
+    type: 'grass', 
+    bounds: [ -4, -2, -2, -2 ],
+    waypoints: [
+      {
+        offset: [ 2, 0 ],
+        time: 2000,
+      },
+      {
+        offset: [ 0, 0 ],
+        time: 4000,
+      },
+    ]
+  },
+  { type: 'grass', bounds: [ -2,  2,  2,  4 ] },
+  { type: 'water', bounds: [  0,  4,  0,  4 ] },
+  { type: 'grass', bounds: [  1,  3,  4,  4 ] },
+  { type: 'grass', bounds: [ -4,  4, -1,  4 ] },
+];
+
+const drawFunc = {
+  'grass': drawTile,
+  'water': drawWater,
+};
+
+let time = 0;
+
+canvas.update = ( dt ) => {
+  time += dt;
+}
+
+canvas.draw = ( ctx ) => {
+  ctx.lineWidth = 0.002 / canvas.zoom;
+
+  ctx.translate( -0.5, -0.5 );
+
+  tiles.forEach( tile => {
+
+    let offsetX = 0, offsetY = 0;
+
+    if ( tile.waypoints ) {
+      const totalTime = tile.waypoints[ tile.waypoints.length - 1 ].time;
+      const loopTime = time % totalTime;
+
+      let index = 0;
+      for ( ; tile.waypoints[ index ].time < loopTime; index ++ );
+
+      const nextWaypoint = tile.waypoints[ index ];
+      const prevWaypoint = index > 0 ? tile.waypoints[ index - 1 ] : {
+        offset: [ 0, 0 ],
+        time: 0,
+      };
+
+      const partialTime = ( loopTime - prevWaypoint.time ) / ( nextWaypoint.time - prevWaypoint.time );
+
+      offsetX = prevWaypoint.offset[ 0 ] + ( nextWaypoint.offset[ 0 ] - prevWaypoint.offset[ 0 ] ) * partialTime;
+      offsetY = prevWaypoint.offset[ 1 ] + ( nextWaypoint.offset[ 1 ] - prevWaypoint.offset[ 1 ] ) * partialTime;
+    }
+
+    ctx.translate( offsetX, offsetY );
+
+    drawFunc[ tile.type ]( ctx, ...tile.bounds );
+
+    ctx.translate( -offsetX, -offsetY );
+
+  } );
+
+  ctx.strokeStyle = '#ccca';
+
+  // Make it look like:
+  // + - - +
+  // |     |
+  // |     |
+  // + - - +
+  ctx.setLineDash( [ 0.1, 0.2, 0.1, 0.2, 0.1, 0.2, 0.1, 0 ] );
+  // ctx.stroke( getGrid( -4, -4, 4, 4 ) );
+
+  ctx.translate( 0.5, 0.5 );
+}
+
+canvas.start();
+
+function drawTile( ctx, startCol, startRow, endCol, endRow ) {
+  
+  const dirt = new Path2D();
+  dirt.rect( startCol, startRow, 1 + endCol - startCol, 1 + endRow - startRow );
+  ctx.fillStyle = 'tan';
+  ctx.fill( dirt );
+  
+  const brick = getBrick( startCol, startRow, endCol, endRow );
+  ctx.strokeStyle = 'gray';
+  ctx.stroke( brick );
+
+
+  // Outline the dirt last (to cover any other mess)
+  ctx.strokeStyle = 'black';
+  ctx.stroke( dirt );
+
+  const GRASS_OFFSET = 0.1;
+  const GRASS_HEIGHT = [ 0.2, 0.3 ];
+
+  const grass = new Path2D();
+
+  grass.moveTo( startCol - GRASS_OFFSET, startRow );
+  grass.lineTo( startCol - GRASS_OFFSET, startRow + GRASS_HEIGHT[ 1 ] );
+
+  const GRASS_PER_TILE = 10;
+
+  for ( let x = 0, ndx = 0; x <= ( 1 + endCol - startCol ) * GRASS_PER_TILE; x ++, ndx = ( ndx + 1 ) % 2 ) {
+    grass.lineTo( startCol + x / GRASS_PER_TILE, startRow + GRASS_HEIGHT[ ndx ] );
+  }
+
+  grass.lineTo( 1 + endCol + GRASS_OFFSET, startRow + GRASS_HEIGHT[ 1 ] );
+  grass.lineTo( 1 + endCol + GRASS_OFFSET, startRow );
+
+  grass.closePath();
+
+
+  ctx.fillStyle = 'lime';
+  ctx.fill( grass );
+  ctx.strokeStyle = 'black';
+  ctx.stroke( grass );
+}
+
+function drawWater( ctx, startCol, startRow, endCol, endRow ) {
+  const WAVE_CREST = 0.1;
+  const WAVES_PER_TILE = 4;
+  const WAVE_SIZE = 1 / WAVES_PER_TILE;
+
+  const water = new Path2D();
+
+  water.moveTo( startCol, endRow + 1 );
+  water.lineTo( startCol, startRow + WAVE_CREST );
+
+  const offset = ( time / 4000 ) % WAVE_SIZE;
+  const crest = WAVE_CREST * ( 1.5 + 0.5 * Math.sin( time / 500 ) ); 
+
+  for ( let x = 0, ndx = 0; x <= ( 1 + endCol - startCol ) * WAVES_PER_TILE; x ++, ndx = ( ndx + 1 ) % 2 ) {
+    water.arc( startCol + offset - WAVE_SIZE / 2 + x / WAVES_PER_TILE, startRow + crest, WAVE_SIZE / 2, Math.PI, 0, true /* counter-clockwise */ );
+  }
+
+  water.lineTo( 1 + endCol, startRow + WAVE_CREST );
+  water.lineTo( 1 + endCol, endRow + 1);
+
+  water.closePath();
+
+  ctx.fillStyle = '#00fa';
+  ctx.fill( water );
+  ctx.strokeStyle = 'black';
+  ctx.stroke( water );
+}
+
+function getBrick( startCol, startRow, endCol, endRow ) {
+  const brick = new Path2D();
+
+  const SUB_COLS = 6, SUB_ROWS = 6;
+
+  for ( let row = startRow; row < endRow + 1; row ++ ) {
+    for ( let subRow = 0; subRow < SUB_ROWS; subRow ++ ) {
+      const y0 = row + subRow / SUB_ROWS;
+      const y1 = row + ( subRow + 1 ) / SUB_ROWS;
+
+      brick.moveTo( startCol, y0 );
+      brick.lineTo( endCol + 1, y0 );
+
+      for ( let col = startCol; col < endCol + 1; col ++ ) {
+        for ( let subCol = 0; subCol < SUB_COLS; subCol ++ ) {
+
+          if ( subCol % 2 == subRow % 2 ) {
+            const x = col + subCol / SUB_COLS;
+            
+            brick.moveTo( x, y0 );
+            brick.lineTo( x, y1 );
+          }
+        }
+      }
+    }
+  }
+
+  return brick;
+}
+
+function getGrid( minX, minY, maxX, maxY ) {
+  const grid = new Path2D();
+
+  for ( let col = minX; col <= maxX + 1; col ++ ) {
+    grid.moveTo( col, minY );
+    grid.lineTo( col, maxY + 1 );
+  }
+
+  for ( let row = minY; row <= maxY + 1; row ++ ) {
+    grid.moveTo( minX, row );
+    grid.lineTo( maxX + 1, row );
+  }
+
+  return grid;
+}
+
+</script>
