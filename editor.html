@@ -86,56 +86,35 @@
     if ( editorState.selectedIndex >= 0 ) {
 
       const block = editorState.level.blocks[ editorState.selectedIndex ];
-      const w = block.bounds[ 2 ] - block.bounds[ 0 ];
-      const h = block.bounds[ 3 ] - block.bounds[ 1 ];
-
-      // Grow (shift)
-      if ( e.shiftKey ) {
-        Level.applyCommand( 
-          editorState.level, 
-          { 
-            type: 'ChangeBlockBounds', 
-            index: editorState.selectedIndex,
-            dx1: e.key == 'ArrowLeft' ? -1 : 0,
-            dy1: e.key == 'ArrowUp'   ? -1 : 0,
-            dx2: e.key == 'ArrowRight' ? 1 : 0,
-            dy2: e.key == 'ArrowDown'  ? 1 : 0,
-          }
-        );
-      }
-
-      // Shrink (control)
-      else if ( e.ctrlKey ) {
-        Level.applyCommand( 
-          editorState.level, 
-          { 
-            type: 'ChangeBlockBounds', 
-            index: editorState.selectedIndex,
-            dx1: ( w > 1 && e.key == 'ArrowRight' ) ?  1 : 0,
-            dy1: ( h > 1 && e.key == 'ArrowDown'  ) ?  1 : 0,
-            dx2: ( w > 1 && e.key == 'ArrowLeft'  ) ? -1 : 0,
-            dy2: ( h > 1 && e.key == 'ArrowUp'    ) ? -1 : 0,
-          }
-        );
-      }
       
-      // Move (no modifier)
-      else {
-        const dx = e.key == 'ArrowLeft' ? -1 : e.key == 'ArrowRight' ? 1 : 0;
-        const dy = e.key == 'ArrowUp'   ? -1 : e.key == 'ArrowDown'  ? 1 : 0;
-        
-        Level.applyCommand( 
-          editorState.level, 
-          { 
-            type: 'ChangeBlockBounds', 
-            index: editorState.selectedIndex,
-            dx1: dx,
-            dy1: dy,
-            dx2: dx,
-            dy2: dy,
-          }
-        );
+      const dx = e.key == 'ArrowLeft' ? -1 : e.key == 'ArrowRight' ? 1 : 0;
+      const dy = e.key == 'ArrowUp'   ? -1 : e.key == 'ArrowDown'  ? 1 : 0;
+
+      // Adjust startCol/Row with Control, endCol/Row with Shift (if neither, it's a move)
+      const dBounds = [
+        e.shiftKey ? 0 : dx,
+        e.shiftKey ? 0 : dy,
+        e.ctrlKey  ? 0 : dx,
+        e.ctrlKey  ? 0 : dy,
+      ];
+
+      // Don't apply if would result in width or height smaller than 0
+      const afterBounds = block.bounds.map( ( val, index ) => val + dBounds[ index ] );
+      if ( afterBounds[ 2 ] - afterBounds [ 0 ] < 0 || afterBounds[ 3 ] - afterBounds[ 1 ] < 0 ) {
+        return;
       }
+
+      Level.applyCommand( 
+        editorState.level, 
+        { 
+          type: 'ChangeBlockBounds', 
+          index: editorState.selectedIndex,
+          dx1: dBounds[ 0 ],
+          dy1: dBounds[ 1 ],
+          dx2: dBounds[ 2 ],
+          dy2: dBounds[ 3 ],
+        }
+      );
     }
 
     canvas.redraw();
