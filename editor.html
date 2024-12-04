@@ -44,6 +44,8 @@
 
   Level.applyCommand( editorState.level, { type: 'AddBlock', index: 5, block: { type: 'water', bounds: [ 2, -2, 3, -1 ] } } );
 
+  Level.applyCommand( editorState.level, { type: 'ReorderBlock', index: 2, dIndex: 1 } );
+
 
   //
   // Canvas
@@ -71,6 +73,39 @@
   // Input
   //
 
+  function reorderBlock( dIndex ) {
+    if ( editorState.selectedIndex >= 0 ) {
+      const nextIndex = editorState.selectedIndex + dIndex;
+
+      if ( 0 <= nextIndex && nextIndex < editorState.level.blocks.length ) {
+        Level.applyCommand(
+          editorState.level,
+          {
+            type: 'ReorderBlock',
+            index: editorState.selectedIndex,
+            dIndex: dIndex,
+          }
+        );
+
+        editorState.selectedIndex = nextIndex;
+      }
+    }
+
+    canvas.redraw();
+  }
+
+  function deleteBlock() {
+    Level.applyCommand(
+      editorState.level,
+      {
+        type: 'DeleteBlock',
+        index: editorState.selectedIndex,
+      }
+    );
+
+    editorState.selectedIndex = -1;
+  }
+
   canvas.pointerDown = ( p ) => {
     if ( p.buttons == 1 ) {
       editorState.selectedIndex = editorState.level.blocks.findLastIndex( block => 
@@ -81,8 +116,43 @@
 
     canvas.redraw();
   }
+
+  canvas.wheelInput = ( p ) => {
+    reorderBlock( Math.sign( p.wheel ) );
+  }
   
   document.addEventListener( 'keydown', e => {
+    if ( e.key == 'Escape' ) {
+      editorState.selectedIndex = -1;
+    }
+
+    if ( e.key == 'Tab' ) {
+      if ( e.shiftKey ) {
+        editorState.selectedIndex --;
+
+        if ( editorState.selectedIndex < 0 ) {
+          editorState.selectedIndex = editorState.level.blocks.length - 1;
+        }
+      }
+      else {
+        editorState.selectedIndex = ( editorState.selectedIndex + 1 ) % editorState.level.blocks.length;
+      }
+
+      e.preventDefault();
+    }
+
+    if ( e.key == 'Delete' || e.key == 'Backspace' ) {
+      deleteBlock();
+    }
+
+    if ( e.key == 'PageUp' ) {
+      reorderBlock( 1 );
+    }
+
+    if ( e.key == 'PageDown' ) {
+      reorderBlock( -1 );
+    }
+
     if ( editorState.selectedIndex >= 0 ) {
 
       const block = editorState.level.blocks[ editorState.selectedIndex ];
