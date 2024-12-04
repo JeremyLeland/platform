@@ -27,10 +27,11 @@
         ],
       },
       undoStack: [],
-      selectedIndex: null,
+      selectedIndex: -1,
     }
   }
 
+  // TEMP: Testing level commands
   let editorState = newEditorState();
 
   Level.applyCommand( editorState.level, { type: 'ChangeBlockBounds', index: 0, dx1: 1, dy1: 1, dx2: 1, dy2: 1 } );
@@ -43,6 +44,11 @@
 
   Level.applyCommand( editorState.level, { type: 'AddBlock', index: 5, block: { type: 'water', bounds: [ 2, -2, 3, -1 ] } } );
 
+
+  //
+  // Canvas
+  //
+
   const canvas = new Canvas();
   canvas.backgroundColor = 'dodgerblue';
   canvas.lineWidth = 2;
@@ -52,6 +58,49 @@
 
   canvas.draw = ( ctx ) => {
     editorState.level.blocks.forEach( block => Block.draw( ctx, block ) );
+
+    if ( editorState.selectedIndex >= 0 ) {
+      const bounds = editorState.level.blocks[ editorState.selectedIndex ].bounds;
+
+      ctx.fillStyle = '#fffa';
+      ctx.fillRect( bounds[ 0 ], bounds[ 1 ], bounds[ 2 ] + 1 - bounds[ 0 ], bounds[ 3 ] + 1 - bounds[ 1 ] );
+    }
   }
+
+  //
+  // Input
+  //
+
+  canvas.pointerDown = ( p ) => {
+    if ( p.buttons == 1 ) {
+      editorState.selectedIndex = editorState.level.blocks.findLastIndex( block => 
+        block.bounds[ 0 ] <= p.x && p.x <= block.bounds[ 2 ] + 1 &&
+        block.bounds[ 1 ] <= p.y && p.y <= block.bounds[ 3 ] + 1
+      );
+    }
+
+    canvas.redraw();
+  }
+  
+  document.addEventListener( 'keydown', e => {
+    if ( editorState.selectedIndex >= 0 ) {
+      const dx = e.key == 'ArrowLeft' ? -1 : e.key == 'ArrowRight' ? 1 : 0;
+      const dy = e.key == 'ArrowUp'   ? -1 : e.key == 'ArrowDown'  ? 1 : 0;
+
+      Level.applyCommand( 
+        editorState.level, 
+        { 
+          type: 'ChangeBlockBounds', 
+          index: editorState.selectedIndex,
+          dx1: dx,
+          dy1: dy,
+          dx2: dx,
+          dy2: dy,
+        }
+      );
+    }
+
+    canvas.redraw();
+  } );
   
 </script>
