@@ -59,8 +59,8 @@ function drawTile( ctx, startCol, startRow, endCol, endRow ) {
   dirt.rect( startCol, startRow, 1 + endCol - startCol, 1 + endRow - startRow );
   ctx.fillStyle = 'tan';
   ctx.fill( dirt );
-  ctx.strokeStyle = 'black';
-  ctx.stroke( dirt );
+  // ctx.strokeStyle = 'black';
+  // ctx.stroke( dirt );
 
   // Small circles for detail
   // for ( let row = startRow; row < endRow + 1; row ++ ) {
@@ -95,6 +95,15 @@ function drawTile( ctx, startCol, startRow, endCol, endRow ) {
     ctx.fill();
     // ctx.stroke();
   }
+
+  const brick = getBrick( startCol, startRow, endCol, endRow );
+  ctx.strokeStyle = 'gray';
+  ctx.stroke( brick );
+
+
+  // Outline the dirt last (to cover any other mess)
+  ctx.strokeStyle = 'black';
+  ctx.stroke( dirt );
 
   const GRASS_OFFSET = 0.1;
   const GRASS_HEIGHT = [ 0.2, 0.3 ];
@@ -148,6 +157,36 @@ function drawWater( ctx, startCol, startRow, endCol, endRow ) {
   ctx.fill( water );
   ctx.strokeStyle = 'black';
   ctx.stroke( water );
+}
+
+function getBrick( startCol, startRow, endCol, endRow ) {
+  const brick = new Path2D();
+
+  const SUB_COLS = 6, SUB_ROWS = 6;
+
+  for ( let row = startRow; row < endRow + 1; row ++ ) {
+    for ( let subRow = 0; subRow < SUB_ROWS; subRow ++ ) {
+      const y0 = row + subRow / SUB_ROWS;
+      const y1 = row + ( subRow + 1 ) / SUB_ROWS;
+
+      brick.moveTo( startCol, y0 );
+      brick.lineTo( endCol + 1, y0 );
+
+      for ( let col = startCol; col < endCol + 1; col ++ ) {
+        for ( let subCol = 0; subCol < SUB_COLS; subCol ++ ) {
+
+          if ( subCol % 2 == subRow % 2 ) {
+            const x = col + subCol / SUB_COLS;
+            
+            brick.moveTo( x, y0 );
+            brick.lineTo( x, y1 );
+          }
+        }
+      }
+    }
+  }
+
+  return brick;
 }
 
 function getGrid( minX, minY, maxX, maxY ) {
