@@ -12,8 +12,8 @@ export const Edit = {
     undo:  ( level, cmd ) => deleteBlock( level, cmd.index ),
   },
   ChangeBlockBounds: {
-    apply: ( level, cmd ) => changeBlockBounds( level, cmd.index, cmd.dx1, cmd.dy1, cmd.dx2, cmd.dy2 ),
-    undo:  ( level, cmd ) => changeBlockBounds( level, cmd.index, -cmd.dx1, -cmd.dy1, -cmd.dx2, -cmd.dy2 ),
+    apply: ( level, cmd ) => changeBlockBounds( level, cmd.index, cmd.dBounds ),
+    undo:  ( level, cmd ) => changeBlockBounds( level, cmd.index, cmd.dBounds.map( b => -b ) ),
   },
   DeleteBlock: {
     apply: ( level, cmd ) => deleteBlock( level, cmd.index ),
@@ -29,9 +29,6 @@ function deleteBlock( level, index ) {
   level.blocks.splice( index, 1 );
 }
 
-function changeBlockBounds( level, index, dx1, dy1, dx2, dy2 ) {
-  level.blocks[ index ].bounds[ 0 ] += dx1;
-  level.blocks[ index ].bounds[ 1 ] += dy1;
-  level.blocks[ index ].bounds[ 2 ] += dx2;
-  level.blocks[ index ].bounds[ 3 ] += dy2;
+function changeBlockBounds( level, index, dBounds ) {
+  dBounds.forEach( ( b, bIndex ) => level.blocks[ index ].bounds[ bIndex ] += b );
 }
