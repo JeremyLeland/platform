@@ -4,6 +4,7 @@ export class Canvas {
   scrollY = 0;
 
   backgroundColor = 'black';
+  lineWidth = 0.1;
 
   #scale = 1;
   #offsetX = 0;
@@ -120,7 +121,7 @@ export class Canvas {
       this.ctx.scale( this.zoom, this.zoom );
       this.ctx.translate( -this.scrollX, -this.scrollY );
 
-      this.ctx.lineWidth = this.zoom;
+      this.ctx.lineWidth = this.lineWidth / ( this.#scale * this.zoom );
 
       try {
         this.draw( this.ctx );

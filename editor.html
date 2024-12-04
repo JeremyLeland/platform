@@ -1,0 +1,57 @@
+<title>Platform Editor</title>
+<link rel="stylesheet" href="./style.css">
+
+<div id="ui" style="position: absolute;">
+  <button id="play">Play</button>
+  <button id="save">Save</button>
+  <button id="load">Load</button>
+  <button id="undo">Undo</button>
+  <button id="clear">Clear</button>
+</div>
+
+<script type="module">
+  import { Canvas } from './src/common/Canvas.js';
+  import * as Block from './src/Block.js';
+  import * as Level from './src/Level.js';
+
+  function newEditorState( levelJson ) {
+    return {
+      level: {
+        blocks: [
+          { type: 'grass', bounds: [  2, -2,  4, -1 ] },
+          { type: 'grass', bounds: [ -4, -2, -2, -2 ] },
+          { type: 'grass', bounds: [ -2,  2,  2,  4 ] },
+          { type: 'water', bounds: [  0,  4,  0,  4 ] },
+          { type: 'grass', bounds: [  1,  3,  4,  4 ] },
+          { type: 'grass', bounds: [ -4,  4, -1,  4 ] },
+        ],
+      },
+      undoStack: [],
+      selectedIndex: null,
+    }
+  }
+
+  let editorState = newEditorState();
+
+  Level.applyCommand( editorState.level, { type: 'ChangeBlockBounds', index: 0, dx1: 1, dy1: 1, dx2: 1, dy2: 1 } );
+  Level.applyCommand( editorState.level, { type: 'ChangeBlockBounds', index: 1, dx1: -1, dy1: -1, dx2: 0, dy2: 0 } );
+  Level.applyCommand( editorState.level, { type: 'ChangeBlockBounds', index: 2, dx1: 0, dy1: -2, dx2: 0, dy2: 0 } );
+  Level.applyCommand( editorState.level, { type: 'ChangeBlockBounds', index: 4, dx1: 1, dy1: 0, dx2: 0, dy2: 0 } );
+  Level.applyCommand( editorState.level, { type: 'ChangeBlockBounds', index: 5, dx1: 0, dy1: 0, dx2: -1, dy2: 0 } );
+
+  Level.applyCommand( editorState.level, { type: 'DeleteBlock', index: 3 } );
+
+  Level.applyCommand( editorState.level, { type: 'AddBlock', index: 5, block: { type: 'water', bounds: [ 2, -2, 3, -1 ] } } );
+
+  const canvas = new Canvas();
+  canvas.backgroundColor = 'dodgerblue';
+  canvas.lineWidth = 2;
+  canvas.zoom = 1 / 10;
+  canvas.scrollX = -5;
+  canvas.scrollY = -5;
+
+  canvas.draw = ( ctx ) => {
+    editorState.level.blocks.forEach( block => Block.draw( ctx, block ) );
+  }
+  
+</script>
