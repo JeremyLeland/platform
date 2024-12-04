@@ -84,20 +84,58 @@
   
   document.addEventListener( 'keydown', e => {
     if ( editorState.selectedIndex >= 0 ) {
-      const dx = e.key == 'ArrowLeft' ? -1 : e.key == 'ArrowRight' ? 1 : 0;
-      const dy = e.key == 'ArrowUp'   ? -1 : e.key == 'ArrowDown'  ? 1 : 0;
 
-      Level.applyCommand( 
-        editorState.level, 
-        { 
-          type: 'ChangeBlockBounds', 
-          index: editorState.selectedIndex,
-          dx1: dx,
-          dy1: dy,
-          dx2: dx,
-          dy2: dy,
-        }
-      );
+      const block = editorState.level.blocks[ editorState.selectedIndex ];
+      const w = block.bounds[ 2 ] - block.bounds[ 0 ];
+      const h = block.bounds[ 3 ] - block.bounds[ 1 ];
+
+      // Grow (shift)
+      if ( e.shiftKey ) {
+        Level.applyCommand( 
+          editorState.level, 
+          { 
+            type: 'ChangeBlockBounds', 
+            index: editorState.selectedIndex,
+            dx1: e.key == 'ArrowLeft' ? -1 : 0,
+            dy1: e.key == 'ArrowUp'   ? -1 : 0,
+            dx2: e.key == 'ArrowRight' ? 1 : 0,
+            dy2: e.key == 'ArrowDown'  ? 1 : 0,
+          }
+        );
+      }
+
+      // Shrink (control)
+      else if ( e.ctrlKey ) {
+        Level.applyCommand( 
+          editorState.level, 
+          { 
+            type: 'ChangeBlockBounds', 
+            index: editorState.selectedIndex,
+            dx1: ( w > 1 && e.key == 'ArrowRight' ) ?  1 : 0,
+            dy1: ( h > 1 && e.key == 'ArrowDown'  ) ?  1 : 0,
+            dx2: ( w > 1 && e.key == 'ArrowLeft'  ) ? -1 : 0,
+            dy2: ( h > 1 && e.key == 'ArrowUp'    ) ? -1 : 0,
+          }
+        );
+      }
+      
+      // Move (no modifier)
+      else {
+        const dx = e.key == 'ArrowLeft' ? -1 : e.key == 'ArrowRight' ? 1 : 0;
+        const dy = e.key == 'ArrowUp'   ? -1 : e.key == 'ArrowDown'  ? 1 : 0;
+        
+        Level.applyCommand( 
+          editorState.level, 
+          { 
+            type: 'ChangeBlockBounds', 
+            index: editorState.selectedIndex,
+            dx1: dx,
+            dy1: dy,
+            dx2: dx,
+            dy2: dy,
+          }
+        );
+      }
     }
 
     canvas.redraw();
