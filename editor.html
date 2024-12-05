@@ -132,6 +132,21 @@
     editorState.selectedIndex = -1;
   }
 
+  function changeBlockBounds( dBounds ) {
+    // Don't apply if would result in width or height smaller than 0
+    const block = editorState.level.blocks[ editorState.selectedIndex ];
+    const afterBounds = block.bounds.map( ( val, index ) => val + dBounds[ index ] );
+    if ( afterBounds[ 2 ] - afterBounds [ 0 ] < 0 || afterBounds[ 3 ] - afterBounds[ 1 ] < 0 ) {
+      return;
+    }
+
+    applyCommand( { 
+      type: 'ChangeBlockBounds', 
+      index: editorState.selectedIndex,
+      dBounds: dBounds,
+    } );
+  }
+
   function reorderBlock( dIndex ) {
     if ( editorState.selectedIndex >= 0 ) {
       const nextIndex = editorState.selectedIndex + dIndex;
@@ -150,7 +165,7 @@
     canvas.redraw();
   }
 
-  let lastCol, lastRow;
+  let lastCol, lastRow, resizeMode = 0;
 
   canvas.pointerDown = ( p ) => {
     if ( p.buttons == 1 ) {
@@ -162,7 +177,7 @@
       // If we click in an empty spot, deselect first. 
       // If no selection, add a block here
       if ( underPointerIndex == -1 ) {
-        if ( editorState.selectedIndex == -1 ) {
+        if ( editorState.selectedIndex < 0 ) {
           addBlock( Math.floor( p.x ), Math.floor( p.y ) );
         }
         else {
@@ -176,32 +191,59 @@
       lastCol = Math.floor( p.x );
       lastRow = Math.floor( p.y );
     }
+    else if ( p.buttons == 2 ) {
+      if ( editorState.selectedIndex < 0 ) {
+        return;
+      }
+
+      const block = editorState.level.blocks[ editorState.selectedIndex ];
+      const midX = ( block.bounds[ 0 ] + block.bounds[ 2 ] + 1 ) / 2;
+      const midY = ( block.bounds[ 1 ] + block.bounds[ 3 ] + 1 ) / 2;
+
+      resizeMode = ( p.x < midX ) << 3 | ( p.y < midY ) << 2 | ( p.x > midX ) << 1 | ( p.y > midY );
+    }
 
     canvas.redraw();
   }
 
   canvas.pointerMove = ( p ) => {
-    if ( p.buttons == 1 ) {
-      if ( editorState.selectedIndex >= 0 ) {
-        const col = Math.floor( p.x );
-        const row = Math.floor( p.y );
-        
-        const dx = col - lastCol;
-        const dy = row - lastRow;
-        
-        if ( dx != 0 || dy != 0 ) {
-          applyCommand( {
-            type: 'ChangeBlockBounds', 
-            index: editorState.selectedIndex,
-            dBounds: [ dx, dy, dx, dy ],
-          } );
-          
-          lastCol = col;
-          lastRow = row;
-          
-          canvas.redraw();
-        }
+    if ( editorState.selectedIndex < 0 ) {
+      return;
+    }
+
+    const col = Math.floor( p.x );
+    const row = Math.floor( p.y );
+    
+    const dx = col - lastCol;
+    const dy = row - lastRow;
+
+    lastCol = col;
+    lastRow = row;
+    
+    if ( dx != 0 || dy != 0 ) {
+
+      // Move (left-click)
+      if ( p.buttons == 1 ) {
+        applyCommand( {
+          type: 'ChangeBlockBounds', 
+          index: editorState.selectedIndex,
+          dBounds: [ dx, dy, dx, dy ],
+        } );
       }
+      
+      // Resize (right-click)
+      else if ( p.buttons == 2 ) {
+        const dBounds = [
+          resizeMode & ( 1 << 3 ) ? dx : 0,
+          resizeMode & ( 1 << 2 ) ? dy : 0,
+          resizeMode & ( 1 << 1 ) ? dx : 0,
+          resizeMode & ( 1 << 0 ) ? dy : 0,
+        ];
+
+        changeBlockBounds( dBounds );
+      }
+
+      canvas.redraw();
     }
   }
 
@@ -246,9 +288,6 @@
     }
 
     if ( editorState.selectedIndex >= 0 ) {
-
-      const block = editorState.level.blocks[ editorState.selectedIndex ];
-      
       const dx = e.key == 'ArrowLeft' ? -1 : e.key == 'ArrowRight' ? 1 : 0;
       const dy = e.key == 'ArrowUp'   ? -1 : e.key == 'ArrowDown'  ? 1 : 0;
 
@@ -260,17 +299,7 @@
         e.ctrlKey  ? 0 : dy,
       ];
 
-      // Don't apply if would result in width or height smaller than 0
-      const afterBounds = block.bounds.map( ( val, index ) => val + dBounds[ index ] );
-      if ( afterBounds[ 2 ] - afterBounds [ 0 ] < 0 || afterBounds[ 3 ] - afterBounds[ 1 ] < 0 ) {
-        return;
-      }
-
-      applyCommand( { 
-        type: 'ChangeBlockBounds', 
-        index: editorState.selectedIndex,
-        dBounds: dBounds,
-      } );
+      changeBlockBounds( dBounds );
     }
 
     canvas.redraw();
