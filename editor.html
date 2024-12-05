@@ -150,6 +150,8 @@
     canvas.redraw();
   }
 
+  let lastCol, lastRow;
+
   canvas.pointerDown = ( p ) => {
     if ( p.buttons == 1 ) {
       const underPointerIndex = editorState.level.blocks.findLastIndex( block => 
@@ -170,9 +172,37 @@
       else {
         editorState.selectedIndex = underPointerIndex;
       }
+
+      lastCol = Math.floor( p.x );
+      lastRow = Math.floor( p.y );
     }
 
     canvas.redraw();
+  }
+
+  canvas.pointerMove = ( p ) => {
+    if ( p.buttons == 1 ) {
+      if ( editorState.selectedIndex >= 0 ) {
+        const col = Math.floor( p.x );
+        const row = Math.floor( p.y );
+        
+        const dx = col - lastCol;
+        const dy = row - lastRow;
+        
+        if ( dx != 0 || dy != 0 ) {
+          applyCommand( {
+            type: 'ChangeBlockBounds', 
+            index: editorState.selectedIndex,
+            dBounds: [ dx, dy, dx, dy ],
+          } );
+          
+          lastCol = col;
+          lastRow = row;
+          
+          canvas.redraw();
+        }
+      }
+    }
   }
 
   canvas.wheelInput = ( p ) => {
