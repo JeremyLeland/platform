@@ -248,7 +248,19 @@
   }
 
   canvas.wheelInput = ( p ) => {
-    reorderBlock( Math.sign( p.wheel ) );
+    if ( editorState.selectedIndex < 0 ) {
+      if ( p.shiftKey ) {
+        canvas.scrollX -= Math.sign( p.wheel );
+      }
+      else {
+        canvas.scrollY -= Math.sign( p.wheel );
+      }
+    }
+    else {
+      reorderBlock( Math.sign( p.wheel ) );
+    }
+
+    canvas.redraw();
   }
   
   document.addEventListener( 'keydown', e => {

@@ -19,6 +19,8 @@ export class Canvas {
     dy: 0,
     buttons: 0,
     wheel: 0,
+    ctrlKey: false,
+    shiftKey: false,
   };
 
   constructor( canvas ) {
@@ -73,6 +75,8 @@ export class Canvas {
       this.#mouse.x = this.getPointerX( e );
       this.#mouse.y = this.getPointerY( e );
       this.#mouse.buttons = e.buttons;
+      this.#mouse.ctrlKey = e.ctrlKey;
+      this.#mouse.shiftKey = e.shiftKey;
 
       this.pointerDown( this.#mouse );
     } );
@@ -84,6 +88,8 @@ export class Canvas {
       this.#mouse.y = this.getPointerY( e );
       this.#mouse.dx = this.#mouse.x - lastX;
       this.#mouse.dy = this.#mouse.y - lastY;
+      this.#mouse.ctrlKey = e.ctrlKey;
+      this.#mouse.shiftKey = e.shiftKey;
       
       this.pointerMove( this.#mouse );
 
@@ -101,6 +107,8 @@ export class Canvas {
       this.#mouse.x = this.getPointerX( e );
       this.#mouse.y = this.getPointerY( e );
       this.#mouse.wheel = e.wheelDelta;
+      this.#mouse.ctrlKey = e.ctrlKey;
+      this.#mouse.shiftKey = e.shiftKey;
       
       this.wheelInput( this.#mouse );
 
