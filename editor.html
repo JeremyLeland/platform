@@ -56,7 +56,7 @@
 
   const canvas = new Canvas();
   canvas.backgroundColor = 'dodgerblue';
-  canvas.lineWidth = 2;
+  canvas.lineWidth = 0.02;
   canvas.zoom = 1 / 10;
   canvas.scrollX = -5;
   canvas.scrollY = -5;
@@ -251,6 +251,10 @@
     if ( editorState.selectedIndex < 0 ) {
       if ( p.shiftKey ) {
         canvas.scrollX -= Math.sign( p.wheel );
+      }
+      else if ( p.ctrlKey ) {
+        const ZOOM_SPEED = 0.9;
+        canvas.zoomAt( p.x, p.y, p.wheel < 0 ? ZOOM_SPEED : 1 / ZOOM_SPEED );
       }
       else {
         canvas.scrollY -= Math.sign( p.wheel );

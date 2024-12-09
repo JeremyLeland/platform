@@ -113,6 +113,8 @@ export class Canvas {
       this.wheelInput( this.#mouse );
 
       this.#mouse.wheel = 0;
+
+      e.preventDefault();
     } );
   }
 
@@ -129,7 +131,7 @@ export class Canvas {
       this.ctx.scale( this.zoom, this.zoom );
       this.ctx.translate( -this.scrollX, -this.scrollY );
 
-      this.ctx.lineWidth = this.lineWidth / ( this.#scale * this.zoom );
+      this.ctx.lineWidth = this.lineWidth;// / ( this.#scale * this.zoom );
 
       try {
         this.draw( this.ctx );
