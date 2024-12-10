@@ -18,12 +18,12 @@
     return {
       level: {
         blocks: [
-          { type: 'grass', bounds: [  2, -2,  4, -1 ] },
-          { type: 'grass', bounds: [ -4, -2, -2, -2 ] },
-          { type: 'grass', bounds: [ -2,  2,  2,  4 ] },
-          { type: 'water', bounds: [  0,  4,  0,  4 ] },
-          { type: 'grass', bounds: [  1,  3,  4,  4 ] },
-          { type: 'grass', bounds: [ -4,  4, -1,  4 ] },
+          { type: 'lightBrick', bounds: [  2, -2,  4, -1 ] },
+          { type: 'darkBrick', bounds: [ -4, -2, -2, -2 ] },
+          { type: 'lightBrick', bounds: [ -2,  2,  2,  4 ] },
+          { type: 'blueWater', bounds: [  0,  4,  0,  4 ] },
+          { type: 'lightBrick', bounds: [  1,  3,  4,  4 ] },
+          { type: 'darkBrick', bounds: [ -4,  4, -1,  4 ] },
         ],
       },
       undoStack: [],
@@ -45,7 +45,7 @@
 
   Level.applyCommand( editorState.level, { type: 'DeleteBlock', index: 3 } );
 
-  Level.applyCommand( editorState.level, { type: 'AddBlock', index: 5, block: { type: 'water', bounds: [ 2, -2, 3, -1 ] } } );
+  Level.applyCommand( editorState.level, { type: 'AddBlock', index: 5, block: { type: 'blueWater', bounds: [ 2, -2, 3, -1 ] } } );
 
   Level.applyCommand( editorState.level, { type: 'ReorderBlock', index: 2, dIndex: 1 } );
 
@@ -115,7 +115,7 @@
       type: 'AddBlock',
       index: nextIndex,
       block: {
-        type: 'grass',
+        type: 'lightBrick',
         bounds: [ x, y, x, y ],
       },
     } );

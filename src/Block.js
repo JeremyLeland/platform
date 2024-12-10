@@ -1,3 +1,17 @@
+const Styles = {
+  'lightBrick': {
+    'grass': 'lime',
+    'brick': 'tan',
+  },
+  'darkBrick': {
+    'grass': 'green',
+    'brick': 'brown',
+  },
+  'blueWater': {
+    'water': '#00fa',
+  },
+};
+
 export function draw( ctx, block, time = 0 ) {
 
   let offsetX = 0, offsetY = 0;
@@ -23,58 +37,31 @@ export function draw( ctx, block, time = 0 ) {
 
   ctx.translate( offsetX, offsetY );
 
-  drawFunc[ block.type ]( ctx, ...block.bounds );
+  const style = Styles[ block.type ];
+
+  if ( style.brick ) {
+    ctx.fillStyle = style.brick;
+    drawBrick( ctx, ...block.bounds );
+  }
+
+  if ( style.grass ) {
+    ctx.fillStyle = style.grass;
+    drawGrass( ctx, ...block.bounds );
+  }
+
+  if ( style.water ) {
+    ctx.fillStyle = style.water;
+    drawWater( ctx, ...block.bounds );
+  }
 
   ctx.translate( -offsetX, -offsetY );
 }
 
-const drawFunc = {
-  'grass': drawGrass,
-  'water': drawWater,
-};
-
-function drawGrass( ctx, startCol, startRow, endCol, endRow ) {
-  
-  const dirt = new Path2D();
-  dirt.rect( startCol, startRow, 1 + endCol - startCol, 1 + endRow - startRow );
-  ctx.fillStyle = 'tan';
-  ctx.fill( dirt );
-  // ctx.strokeStyle = 'black';
-  // ctx.stroke( dirt );
-
-  // Small circles for detail
-  // for ( let row = startRow; row < endRow + 1; row ++ ) {
-  //   for ( let col = startCol; col < endCol + 1; col ++ ) {
-  //     for ( let i = 0; i < 1; i ++ ) {
-  //       ctx.beginPath();
-  //       ctx.arc(
-  //         col + 0.5 + 0.2 * ( 1 - 2 * Math.random() ), 
-  //         row + 0.5 + 0.2 * ( 1 - 2 * Math.random() ), 
-  //         0.02 + 0.01 * Math.random(), 
-  //         0, 
-  //         Math.PI * 2 
-  //       );
-  //       ctx.fillStyle = 'brown';
-  //       ctx.fill();
-  //       // ctx.stroke();
-  //     }
-  //   }
-  // }
-
-  // const numDots = 2 * ( endCol + 1 - startCol ) * ( endRow + 1 - startRow );
-  // for ( let i = 0; i < numDots; i ++ ) {
-  //   ctx.beginPath();
-  //   ctx.arc(
-  //     startCol + ( endCol + 1 - startCol ) * Math.random(),
-  //     startRow + ( endRow + 1 - startRow ) * Math.random(),
-  //     0.02 + 0.01 * Math.random(), 
-  //     0,
-  //     Math.PI * 2
-  //   );
-  //   ctx.fillStyle = 'brown';
-  //   ctx.fill();
-  //   // ctx.stroke();
-  // }
+function drawBrick( ctx, startCol, startRow, endCol, endRow ) {
+  const body = new Path2D();
+  body.rect( startCol, startRow, 1 + endCol - startCol, 1 + endRow - startRow );
+  // ctx.fillStyle = 'tan';
+  ctx.fill( body );
 
   const border = new Path2D();
   const light = new Path2D();
@@ -137,11 +124,12 @@ function drawGrass( ctx, startCol, startRow, endCol, endRow ) {
   ctx.stroke( border );
 
 
-
-  // Outline the dirt last (to cover any other mess)
+  // Outline the block last (to cover any other mess)
   ctx.strokeStyle = 'black';
-  ctx.stroke( dirt );
+  ctx.stroke( body );
+}
 
+function drawGrass( ctx, startCol, startRow, endCol, endRow ) {
   const GRASS_OFFSET = 0.1;
   const GRASS_HEIGHT = [ 0.2, 0.3 ];
 
@@ -162,7 +150,7 @@ function drawGrass( ctx, startCol, startRow, endCol, endRow ) {
   grass.closePath();
 
 
-  ctx.fillStyle = 'lime';
+  // ctx.fillStyle = 'lime';
   ctx.fill( grass );
   ctx.strokeStyle = 'black';
   ctx.stroke( grass );
@@ -190,7 +178,7 @@ function drawWater( ctx, startCol, startRow, endCol, endRow, time = 0 ) {
 
   water.closePath();
 
-  ctx.fillStyle = '#00fa';
+  // ctx.fillStyle = '#00fa';
   ctx.fill( water );
   ctx.strokeStyle = 'black';
   ctx.stroke( water );
