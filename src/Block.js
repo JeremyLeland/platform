@@ -1,4 +1,4 @@
-const Styles = {
+export const Styles = {
   'lightBrick': {
     'grass': 'lime',
     'brick': 'tan',

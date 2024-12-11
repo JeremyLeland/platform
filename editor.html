@@ -7,6 +7,7 @@
   <button id="load">Load</button>
   <button id="undo">Undo</button>
   <button id="clear">Clear</button>
+  <div id="blockStyles"></div>
 </div>
 
 <script type="module">
@@ -14,40 +15,53 @@
   import * as Block from './src/Block.js';
   import * as Level from './src/Level.js';
 
+  //
+  // Editor state
+  //
+  const EditorStateKey = 'platformEditorState';
+
+  let editorState = JSON.parse( localStorage.getItem( EditorStateKey ) ) ?? newEditorState();
+
+  window.addEventListener( 'beforeunload', ( e ) =>
+    localStorage.setItem( EditorStateKey, JSON.stringify( editorState ) )
+  );
+
   function newEditorState( levelJson ) {
     return {
-      level: {
-        blocks: [
-          { type: 'lightBrick', bounds: [  2, -2,  4, -1 ] },
-          { type: 'darkBrick', bounds: [ -4, -2, -2, -2 ] },
-          { type: 'lightBrick', bounds: [ -2,  2,  2,  4 ] },
-          { type: 'blueWater', bounds: [  0,  4,  0,  4 ] },
-          { type: 'lightBrick', bounds: [  1,  3,  4,  4 ] },
-          { type: 'darkBrick', bounds: [ -4,  4, -1,  4 ] },
-        ],
-      },
+      level: levelJson ?? Level.newLevel(),
       undoStack: [],
       selectedIndex: -1,
+      activeBrush: Object.keys( Block.Styles )[ 0 ],
       options: {
         grid: true,
       }
     }
   }
 
+  // const testJSON = {
+  //   blocks: [
+  //     { type: 'lightBrick', bounds: [  2, -2,  4, -1 ] },
+  //     { type: 'darkBrick', bounds: [ -4, -2, -2, -2 ] },
+  //     { type: 'lightBrick', bounds: [ -2,  2,  2,  4 ] },
+  //     { type: 'blueWater', bounds: [  0,  4,  0,  4 ] },
+  //     { type: 'lightBrick', bounds: [  1,  3,  4,  4 ] },
+  //     { type: 'darkBrick', bounds: [ -4,  4, -1,  4 ] },
+  //   ],
+  // };
+
   // TEMP: Testing level commands
-  let editorState = newEditorState();
 
-  Level.applyCommand( editorState.level, { type: 'ChangeBlockBounds', index: 0, dBounds: [ 1, 1, 1, 1 ] } );
-  Level.applyCommand( editorState.level, { type: 'ChangeBlockBounds', index: 1, dBounds: [ -1, -1, 0, 0 ] } );
-  Level.applyCommand( editorState.level, { type: 'ChangeBlockBounds', index: 2, dBounds: [ 0, -2, 0, 0 ] } );
-  Level.applyCommand( editorState.level, { type: 'ChangeBlockBounds', index: 4, dBounds: [ 1, 0, 0, 0 ] } );
-  Level.applyCommand( editorState.level, { type: 'ChangeBlockBounds', index: 5, dBounds: [ 0, 0, -1, 0 ] } );
+  // Level.applyCommand( editorState.level, { type: 'ChangeBlockBounds', index: 0, dBounds: [ 1, 1, 1, 1 ] } );
+  // Level.applyCommand( editorState.level, { type: 'ChangeBlockBounds', index: 1, dBounds: [ -1, -1, 0, 0 ] } );
+  // Level.applyCommand( editorState.level, { type: 'ChangeBlockBounds', index: 2, dBounds: [ 0, -2, 0, 0 ] } );
+  // Level.applyCommand( editorState.level, { type: 'ChangeBlockBounds', index: 4, dBounds: [ 1, 0, 0, 0 ] } );
+  // Level.applyCommand( editorState.level, { type: 'ChangeBlockBounds', index: 5, dBounds: [ 0, 0, -1, 0 ] } );
 
-  Level.applyCommand( editorState.level, { type: 'DeleteBlock', index: 3 } );
+  // Level.applyCommand( editorState.level, { type: 'DeleteBlock', index: 3 } );
 
-  Level.applyCommand( editorState.level, { type: 'AddBlock', index: 5, block: { type: 'blueWater', bounds: [ 2, -2, 3, -1 ] } } );
+  // Level.applyCommand( editorState.level, { type: 'AddBlock', index: 5, block: { type: 'blueWater', bounds: [ 2, -2, 3, -1 ] } } );
 
-  Level.applyCommand( editorState.level, { type: 'ReorderBlock', index: 2, dIndex: 1 } );
+  // Level.applyCommand( editorState.level, { type: 'ReorderBlock', index: 2, dIndex: 1 } );
 
 
   //
@@ -78,8 +92,28 @@
       // |     |
       // + - - +
       ctx.setLineDash( [ 0.1, 0.2, 0.1, 0.2, 0.1, 0.2, 0.1, 0 ] );
-      ctx.strokeStyle = '#ccca';
-      ctx.stroke( getGrid( -4, -4, 4, 4 ) );
+      ctx.fillStyle = ctx.strokeStyle = '#ccca';
+      ctx.stroke( getGrid( -10, -4, 10, 4 ) );
+
+      ctx.save(); {
+        ctx.font = '0.2px Arial';
+        ctx.textAlign = 'center';
+        // ctx.textBaseline = 'middle';
+
+        ctx.translate( -10, -4 );
+        for ( let row = -4; row <= 4; row ++ ) {
+          ctx.save(); {
+            for ( let col = -10; col <= 10; col ++ ) {
+              ctx.fillText( `(${ col },${ row })`, 0.5, 0.5 );
+              ctx.translate( 1, 0 );
+            }
+          }
+          ctx.restore();
+
+          ctx.translate( 0, 1 );
+        }
+      }
+      ctx.restore();
     }
   }
 
@@ -101,8 +135,14 @@
   }
 
   //
-  // Input
+  // Commands
   //
+
+  function load( json ) {
+    if ( json != null ) {
+      editorState = newEditorState( json );
+    }
+  }
 
   function applyCommand( cmd ) {
     Level.applyCommand( editorState.level, cmd );
@@ -115,7 +155,7 @@
       type: 'AddBlock',
       index: nextIndex,
       block: {
-        type: 'lightBrick',
+        type: editorState.activeBrush,
         bounds: [ x, y, x, y ],
       },
     } );
@@ -164,6 +204,10 @@
 
     canvas.redraw();
   }
+
+  //
+  // Mouse input
+  //
 
   let lastCol, lastRow, resizeMode = 0;
 
@@ -266,6 +310,10 @@
 
     canvas.redraw();
   }
+
+  //
+  // Keyboard input
+  //
   
   document.addEventListener( 'keydown', e => {
     if ( e.key == 'Escape' ) {
@@ -320,5 +368,63 @@
 
     canvas.redraw();
   } );
+
+  //
+  // Menu buttons
+  //
+
+  const buttonActions = {
+    'play': ( e ) => {
+      // if ( mode == Mode.Edit ) {
+      //   mode = Mode.Play;
+      //   document.getElementById( 'play' ).innerText = 'Edit';
+      //   world = new World( editorState.level );
+      //   canvas.start();
+      // }
+      // else if ( mode == Mode.Play ) {
+      //   canvas.stop();
+
+      //   mode = Mode.Edit;
+      //   document.getElementById( 'play' ).innerText = 'Play';
+      //   world = null;
+      //   canvas.redraw();
+      // }
+    },
+    'save': ( e ) => {
+      alert( JSON.stringify( editorState.level ) );
+    },
+    'load': ( e ) => {
+      load( JSON.parse( prompt() ) );
+    },
+    'undo': ( e ) => {
+      undo();
+    },
+    'clear': ( e ) => {
+      editorState = newEditorState();
+      canvas.redraw();
+    }
+  }
+
+  for ( const buttonId in buttonActions ) {
+    document.getElementById( buttonId ).addEventListener( 'click', buttonActions[ buttonId ] );
+  }
+
+  {
+    const stylesDiv = document.getElementById( 'blockStyles' );
+
+    for ( const blockStyle in Block.Styles ) {
+      const button = document.createElement( 'button' );
+      button.textContent = blockStyle;
+      button.dataset.type = blockStyle;
+
+      stylesDiv.append( button );
+    }
+
+    stylesDiv.addEventListener( 'click', e => {
+      if ( e.target.dataset.type ) {
+        editorState.activeBrush = e.target.dataset.type;
+      }
+    } );
+  }
   
 </script>

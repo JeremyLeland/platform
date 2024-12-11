@@ -1,3 +1,9 @@
+export function newLevel() {
+  return {
+    blocks: [],
+  }
+}
+
 export function applyCommand( level, cmd ) {
   Edit[ cmd.type ].apply( level, cmd );
 }
