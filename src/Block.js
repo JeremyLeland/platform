@@ -7,6 +7,9 @@ export const Styles = {
     'grass': 'green',
     'brick': 'brown',
   },
+  'stoneBrick': {
+    'brick': 'gray',
+  },
   'blueWater': {
     'water': '#00fa',
   },

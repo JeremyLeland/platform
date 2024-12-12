@@ -1,3 +1,4 @@
+import { Line } from './common/Line.js';
 import * as Block from './Block.js';
 
 export const Constants = {
@@ -18,56 +19,72 @@ export class World {
   };
 
   #level;
+  #lines = [];
 
   constructor( level ) {
     this.#level = level;
+
+    level.blocks.forEach( b => {
+      this.#lines.push( 
+        new Line( b.bounds[ 0 ], b.bounds[ 1 ], b.bounds[ 2 ] + 1, b.bounds[ 1 ] ) 
+      );
+
+      if ( b.type == 'stoneBrick' ) {
+        this.#lines.push( 
+          new Line( b.bounds[ 2 ] + 1, b.bounds[ 1 ], b.bounds[ 2 ] + 1, b.bounds[ 3 ] + 1 ) 
+        );
+        this.#lines.push( 
+          new Line( b.bounds[ 2 ] + 1, b.bounds[ 3 ] + 1, b.bounds[ 0 ], b.bounds[ 3 ] + 1 )
+        );
+        this.#lines.push( 
+          new Line( b.bounds[ 0 ], b.bounds[ 3 ] + 1, b.bounds[ 0 ], b.bounds[ 1 ] ) 
+        );
+      }
+    } );
   }
 
   update( dt ) {
 
-    // TODO: Time until parabola hits top or bottom edges?
-    // TODO: Use existing lines tests for collision?
-    
-    this.player.x += this.player.dx * dt;
+    let closestLine = null, closestTime = dt;
 
-    let aboveBlock = null, aboveDist = Infinity;
+    this.#lines.forEach( line => {
+      const time = line.timeToHit( this.player.x, this.player.y, this.player.dx, this.player.dy, Constants.Player.Radius );
 
-    this.#level.blocks.forEach( block => {
-      const dist = block.bounds[ 1 ] - this.player.y - Constants.Player.Radius;
+      if ( 0 <= time && time < closestTime ) {
+        closestLine = line;
+        closestTime = time;
 
-      if ( this.player.x + Constants.Player.Radius > block.bounds[ 0 ] &&
-           this.player.x - Constants.Player.Radius < block.bounds[ 2 ] + 1 &&
-           -Constants.Player.Radius < dist && dist < aboveDist ) {
-        aboveBlock = block;
-        aboveDist = dist;
+        // console.log( `${ JSON.stringify( this.player ) } will hit line ${ JSON.stringify( line ) } at ${ time }` );
       }
     } );
 
-    const fallDist = this.player.dy * dt + 0.5 * Constants.Gravity * dt ** 2;
+    this.player.x += this.player.dx * closestTime;
+    this.player.y += this.player.dy * closestTime;// + 0.5 * Constants.Gravity * closestTime ** 2;
+    this.player.dy += Constants.Gravity * closestTime;
 
-    if ( aboveDist <= fallDist ) {
-      this.player.y += aboveDist;
+    if ( closestLine ) {
       this.player.dy = 0;
+    }
 
-      // debugger;
-    }
-    else {
-      this.player.y += fallDist;
-      this.player.dy += Constants.Gravity * dt;
-    }
+    // TODO: Rest of update?
+
   }
 
   draw( ctx ) {
     this.#level.blocks.forEach( block => Block.draw( ctx, block ) );
 
+    ctx.strokeStyle = 'red';
+    this.#lines.forEach( line => line.draw( ctx ) );
+
     ctx.translate( this.player.x, this.player.y );
     ctx.fillStyle = 'red';
     ctx.strokeStyle = 'black';
 
-    const rad = Constants.Player.Radius;
+    ctx.beginPath();
+    ctx.arc( 0, 0, Constants.Player.Radius, 0, Math.PI * 2 );
 
-    ctx.fillRect( -rad, -rad, rad * 2, rad * 2 );
-    ctx.strokeRect( -rad, -rad, rad * 2, rad * 2 );
+    ctx.fill();
+    ctx.stroke();
     ctx.translate( -this.player.x, -this.player.y );
   }
 
