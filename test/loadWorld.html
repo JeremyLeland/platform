@@ -33,9 +33,8 @@
 
   canvas.start();
 
-  document.addEventListener( 'keydown', e => {
-    world.keyDown( e );
-  } );
+  document.addEventListener( 'keydown', e => world.keyDown( e ) );
+  document.addEventListener( 'keyup',   e => world.keyUp( e ) );
 
   
 </script>
