@@ -86,6 +86,7 @@
     }
     
     if ( editorState.options.grid ) {
+      const GRID_W = 20, GRID_H = 10;
       // Make it look like:
       // + - - +
       // |     |
@@ -93,17 +94,17 @@
       // + - - +
       ctx.setLineDash( [ 0.1, 0.2, 0.1, 0.2, 0.1, 0.2, 0.1, 0 ] );
       ctx.fillStyle = ctx.strokeStyle = '#ccca';
-      ctx.stroke( getGrid( -10, -4, 10, 4 ) );
+      ctx.stroke( getGrid( -GRID_W, -GRID_H, GRID_W, GRID_H ) );
 
       ctx.save(); {
         ctx.font = '0.2px Arial';
         ctx.textAlign = 'center';
         // ctx.textBaseline = 'middle';
 
-        ctx.translate( -10, -4 );
-        for ( let row = -4; row <= 4; row ++ ) {
+        ctx.translate( -GRID_W, -GRID_H );
+        for ( let row = -GRID_H; row <= GRID_H; row ++ ) {
           ctx.save(); {
-            for ( let col = -10; col <= 10; col ++ ) {
+            for ( let col = -GRID_W; col <= GRID_W; col ++ ) {
               ctx.fillText( `(${ col },${ row })`, 0.5, 0.5 );
               ctx.translate( 1, 0 );
             }

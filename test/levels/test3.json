@@ -1,0 +1,121 @@
+{
+  "blocks": [
+    {
+      "type": "stoneBrick",
+      "bounds": [
+        0,
+        1,
+        0,
+        1
+      ]
+    },
+    {
+      "type": "stoneBrick",
+      "bounds": [
+        2,
+        -1,
+        2,
+        -1
+      ]
+    },
+    {
+      "type": "stoneBrick",
+      "bounds": [
+        0,
+        -3,
+        0,
+        -3
+      ]
+    },
+    {
+      "type": "stoneBrick",
+      "bounds": [
+        2,
+        -5,
+        2,
+        -5
+      ]
+    },
+    {
+      "type": "stoneBrick",
+      "bounds": [
+        -2,
+        -1,
+        -2,
+        -1
+      ]
+    },
+    {
+      "type": "stoneBrick",
+      "bounds": [
+        -2,
+        -5,
+        -2,
+        -5
+      ]
+    },
+    {
+      "type": "stoneBrick",
+      "bounds": [
+        -6,
+        1,
+        -4,
+        1
+      ]
+    },
+    {
+      "type": "stoneBrick",
+      "bounds": [
+        4,
+        1,
+        6,
+        1
+      ]
+    },
+    {
+      "type": "stoneBrick",
+      "bounds": [
+        4,
+        -3,
+        6,
+        -3
+      ]
+    },
+    {
+      "type": "stoneBrick",
+      "bounds": [
+        4,
+        -7,
+        6,
+        -7
+      ]
+    },
+    {
+      "type": "stoneBrick",
+      "bounds": [
+        -6,
+        -3,
+        -4,
+        -3
+      ]
+    },
+    {
+      "type": "stoneBrick",
+      "bounds": [
+        -6,
+        -7,
+        -4,
+        -7
+      ]
+    },
+    {
+      "type": "stoneBrick",
+      "bounds": [
+        -9,
+        3,
+        8,
+        3
+      ]
+    }
+  ]
+}

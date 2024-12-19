@@ -9,7 +9,7 @@
 
   new ValuesPanel( Constants );
 
-  const levelJSON = await ( await fetch( './levels/test1.json' ) ).json()
+  const levelJSON = await ( await fetch( './levels/test3.json' ) ).json()
   let world = new World( levelJSON );
 
   //
@@ -25,6 +25,10 @@
 
   canvas.update = ( dt ) => {
     world.update( dt );
+
+    // TODO: Update scroll to center player
+    canvas.scrollX = world.player.x - 5;
+    canvas.scrollY = world.player.y - 5;
   }
 
   canvas.draw = ( ctx ) => {

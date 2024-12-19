@@ -2,17 +2,17 @@ import { Line } from './common/Line.js';
 import * as Block from './Block.js';
 
 export const Constants = {
-  Gravity: 0.0003,
+  Gravity: 0.0001,
   Player: {
     Radius: 0.5,
-    Move: 0.0075,
-    Jump: 0.04,
+    Move: 0.008,
+    Jump: 0.03,
   },
 }
 
 export class World {
   player = {
-    x: -1,
+    x: 0,
     y: 0,
     dx: 0,
     dy: 0,
@@ -47,6 +47,9 @@ export class World {
 
     let closestLine = null, closestTime = dt;
 
+    // TODO: Make this bounding boxes instead of circle vs line
+    //         - Point vs line, but with accel
+
     this.#lines.forEach( line => {
       const time = line.timeToHit( this.player.x, this.player.y, this.player.dx, this.player.dy, Constants.Player.Radius );
 
@@ -61,6 +64,9 @@ export class World {
     this.player.x += this.player.dx * closestTime;
     this.player.y += this.player.dy * closestTime;// + 0.5 * Constants.Gravity * closestTime ** 2;
     this.player.dy += Constants.Gravity * closestTime;
+
+
+    // TODO: Only vertical lines should stop player. Take normal into account?
 
     if ( closestLine ) {
       this.player.dy = 0;

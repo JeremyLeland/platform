@@ -30,7 +30,7 @@ export class ValuesPanel {
         numInputUI.type = 'number';
         // numInputUI.min = 0;
         // numInputUI.max = parent[ val ] * 2;
-        numInputUI.step = Math.pow( 10, Math.floor( Math.log10( parent[ val ] ) ) - 1 );
+        numInputUI.step = Math.pow( 10, Math.floor( Math.log10( Math.abs( parent[ val ] ) ) ) - 1 );
         
         numInputUI.value = parent[ val ];
         numInputUI.oninput = _ => {

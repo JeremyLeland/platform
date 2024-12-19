@@ -1,0 +1,70 @@
+<title>Validate line vs line function</title>
+<link rel="stylesheet" href="../style.css">
+
+<script type="module">
+
+import { Canvas } from '../src/common/Canvas.js';
+import { Line } from '../src/common/Line.js';
+import { ValuesPanel } from '../src/common/ValuesPanel.js';
+
+const line = new Line( 3, 3, 4, 4 );
+
+const vars = {
+  x1: 5,
+  y1: 2,
+  x2: 6,
+  y2: 4,
+  vx: -0.2,
+  vy:  0.1,
+  ax: 0,
+  ay: 0.001,
+}
+
+new ValuesPanel( vars ).valueChanged = _ => canvas.redraw();
+
+const canvas = new Canvas();
+canvas.zoom = 1 / 10;
+
+canvas.draw = ( ctx ) => {
+  ctx.lineWidth = 0.2 * canvas.zoom;
+
+  // Wall
+  ctx.strokeStyle = 'orange';
+  line.draw( ctx );
+
+  // Test segment
+  ctx.beginPath();
+  ctx.moveTo( vars.x1, vars.y1 );
+  ctx.lineTo( vars.x2, vars.y2 );
+  ctx.strokeStyle = 'white';
+  ctx.stroke();
+
+  ctx.strokeStyle = 'gray';
+  ctx.setLineDash( [ 0.1, 0.1 ] );
+  
+  [ [ vars.x1, vars.y1 ], [ vars.x2, vars.y2 ] ].forEach( p => {
+    ctx.beginPath();
+    for ( let t = 0; t <= 20; t += 1 ) {
+      const x = p[ 0 ] + vars.vx * t + 0.5 * vars.ax * t ** 2;
+      const y = p[ 1 ] + vars.vy * t + 0.5 * vars.ay * t ** 2;
+      ctx.lineTo( x, y );
+    }
+    ctx.stroke();
+  } );
+
+  ctx.setLineDash( [] );
+
+  // Find hit
+  const hitTime = line.timeToHitLine( vars.x1, vars.y1, vars.x2, vars.y2, vars.vx, vars.vy, vars.ax, vars.ay );
+
+  ctx.beginPath();
+  [ [ vars.x1, vars.y1 ], [ vars.x2, vars.y2 ] ].forEach( p => {
+      const x = p[ 0 ] + vars.vx * hitTime + 0.5 * vars.ax * hitTime ** 2;
+      const y = p[ 1 ] + vars.vy * hitTime + 0.5 * vars.ay * hitTime ** 2;
+      ctx.lineTo( x, y );
+  } );
+  ctx.strokeStyle = 'red';
+  ctx.stroke();
+}
+
+</script>

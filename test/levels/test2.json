@@ -1,0 +1,211 @@
+{
+  "blocks": [
+    {
+      "type": "stoneBrick",
+      "bounds": [
+        7,
+        4,
+        8,
+        4
+      ]
+    },
+    {
+      "type": "darkBrick",
+      "bounds": [
+        -2,
+        1,
+        2,
+        4
+      ]
+    },
+    {
+      "type": "blueWater",
+      "bounds": [
+        -1,
+        4,
+        1,
+        4
+      ]
+    },
+    {
+      "type": "lightBrick",
+      "bounds": [
+        2,
+        3,
+        5,
+        4
+      ]
+    },
+    {
+      "type": "lightBrick",
+      "bounds": [
+        -5,
+        3,
+        -2,
+        4
+      ]
+    },
+    {
+      "type": "lightBrick",
+      "bounds": [
+        -5,
+        -1,
+        -3,
+        -1
+      ]
+    },
+    {
+      "type": "stoneBrick",
+      "bounds": [
+        0,
+        -3,
+        2,
+        -3
+      ]
+    },
+    {
+      "type": "stoneBrick",
+      "bounds": [
+        10,
+        6,
+        11,
+        6
+      ]
+    },
+    {
+      "type": "lightBrick",
+      "bounds": [
+        4,
+        10,
+        13,
+        10
+      ]
+    },
+    {
+      "type": "stoneBrick",
+      "bounds": [
+        7,
+        8,
+        8,
+        8
+      ]
+    },
+    {
+      "type": "stoneBrick",
+      "bounds": [
+        10,
+        2,
+        11,
+        2
+      ]
+    },
+    {
+      "type": "stoneBrick",
+      "bounds": [
+        7,
+        0,
+        8,
+        0
+      ]
+    },
+    {
+      "type": "stoneBrick",
+      "bounds": [
+        10,
+        -2,
+        11,
+        -2
+      ]
+    },
+    {
+      "type": "lightBrick",
+      "bounds": [
+        -14,
+        2,
+        -13,
+        2
+      ]
+    },
+    {
+      "type": "stoneBrick",
+      "bounds": [
+        7,
+        -4,
+        8,
+        -4
+      ]
+    },
+    {
+      "type": "stoneBrick",
+      "bounds": [
+        10,
+        -6,
+        11,
+        -6
+      ]
+    },
+    {
+      "type": "lightBrick",
+      "bounds": [
+        -11,
+        -8,
+        6,
+        -8
+      ]
+    },
+    {
+      "type": "lightBrick",
+      "bounds": [
+        -14,
+        -6,
+        -13,
+        -6
+      ]
+    },
+    {
+      "type": "lightBrick",
+      "bounds": [
+        -17,
+        -4,
+        -16,
+        -4
+      ]
+    },
+    {
+      "type": "lightBrick",
+      "bounds": [
+        -14,
+        -2,
+        -13,
+        -2
+      ]
+    },
+    {
+      "type": "lightBrick",
+      "bounds": [
+        -17,
+        0,
+        -16,
+        0
+      ]
+    },
+    {
+      "type": "stoneBrick",
+      "bounds": [
+        -17,
+        4,
+        -16,
+        10
+      ]
+    },
+    {
+      "type": "stoneBrick",
+      "bounds": [
+        -15,
+        9,
+        -6,
+        10
+      ]
+    }
+  ]
+}

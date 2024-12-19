@@ -64,7 +64,31 @@ export class Line {
     }
   }
 
-  timeToHit( x, y, dx, dy, radius ) {
+  getIntersection( x1, y1, x2, y2 ) {
+
+  }
+
+  timeToHitLine( x1, y1, x2, y2, dx, dy, ax, ay ) {
+    // TODO: Already colliding? (do we care for this game?)
+
+    const A = timeToPointHitLineAccel( x1, y1, dx, dy, ax, ay, this.x1, this.y1, this.x2, this.y2 );
+    const B = timeToPointHitLineAccel( x2, y2, dx, dy, ax, ay, this.x1, this.y1, this.x2, this.y2 );
+
+    // TODO: Is this as simple as negative accerlation? Or something more?
+    const C = timeToPointHitLineAccel( this.x1, this.y1, -dx, -dy, -ax, -ay, x1, y1, x2, y2 );
+    const D = timeToPointHitLineAccel( this.x2, this.y2, -dx, -dy, -ax, -ay, x1, y1, x2, y2 );
+
+    let closestTime = Infinity;
+    
+    if ( 0 <= A && A < closestTime )  closestTime = A;
+    if ( 0 <= B && B < closestTime )  closestTime = B;
+    if ( 0 <= C && C < closestTime )  closestTime = C;
+    if ( 0 <= D && D < closestTime )  closestTime = D;
+    
+    return closestTime;
+  }
+
+  timeToHitCircle( x, y, dx, dy, radius ) {
     const px = this.x2 - this.x1;
     const py = this.y2 - this.y1;
     const D = ( px * px ) + ( py * py );
@@ -73,7 +97,7 @@ export class Line {
     const normX = py / len;
     const normY = -px / len;
     
-    // Don't consider it a hit if we are moving way
+    // Don't consider it a hit if we are moving away
     const vDotN = dx * normX + dy * normY;
     if ( vDotN > 0 ) {
       return Infinity;
@@ -89,10 +113,10 @@ export class Line {
     const closestOnLine = ( ( hitX - this.x1 ) * px + ( hitY - this.y1 ) * py ) / D;
 
     if ( closestOnLine <= 0 ) {
-      return timeToHitPoint( x, y, dx, dy, radius, this.x1, this.y1 );
+      return timeToCircleHitPoint( x, y, dx, dy, radius, this.x1, this.y1 );
     }
     else if ( 1 <= closestOnLine ) {
-      return timeToHitPoint( x, y, dx, dy, radius, this.x2, this.y2 );
+      return timeToCircleHitPoint( x, y, dx, dy, radius, this.x2, this.y2 );
     }
     else {
       return hitTime;
@@ -100,7 +124,36 @@ export class Line {
   }
 }
 
-function timeToHitPoint( x, y, dx, dy, radius, cx, cy ) {
+function timeToPointHitLineAccel( sx, sy, vx, vy, ax, ay, px, py, qx, qy ) {
+  const w = qx - px;
+  const h = qy - py;
+
+  // TODO: The cross-product bit doesn't work for vertical lines...how to handle?
+  // Maybe see https://www.nagwa.com/en/explainers/516147029054/
+  // "Suppose that we are given parametric equations 𝑥=𝑓(𝑡), 𝑦=𝑔(𝑡) of a curve and the equation of a 
+  // horizontal line 𝑦=𝑎 (𝑎 is a constant) or a vertical line 𝑥=𝑏 (𝑏 is a constant). In this case, 
+  // we can directly set the relevant parametric coordinate equation equal to the constant: 
+  // either 𝑓(𝑡)=𝑏 or 𝑔(𝑡)=𝑎. In both cases, we have a single equation that we can solve for 𝑡 as before."
+
+  const A = 0.5 * ( ( ax*qy - ay*qx ) - ( ax*py - ay*px ) );
+  const B = ( ( vx*qy - vy*qx ) - ( vx*py - vy*px ) );
+  const C = ( ( sx*qy - sy*qx ) - ( sx*py - sy*px ) - ( px*qy - py*qx ) );
+
+  const lineTime = solveQuadratic( A, B, C );
+
+  const lineX = sx + vx * lineTime + 0.5 * ax * lineTime * lineTime;
+  const lineY = sy + vy * lineTime + 0.5 * ay * lineTime * lineTime;
+  const closestOnLine = ( ( lineX - px ) * w + ( lineY - py ) * h ) / ( w * w + h * h );
+
+  if ( 0 <= closestOnLine && closestOnLine <= 1 ) {
+    return lineTime;
+  }
+  else {
+    return Infinity;
+  }
+}
+
+function timeToCircleHitPoint( x, y, dx, dy, radius, cx, cy ) {
   const dX = dx;
   const dY = dy;
   const fX = x - cx;
