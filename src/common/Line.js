@@ -64,11 +64,36 @@ export class Line {
     }
   }
 
-  getIntersection( x1, y1, x2, y2 ) {
+  getOverlap( x1, y1, x2, y2 ) {
+    const px = this.x2 - this.x1;
+    const py = this.y2 - this.y1;
+    const D = ( px * px ) + ( py * py );
 
+    const len = Math.sqrt( D );
+    const normX = py / len;
+    const normY = -px / len;
+    
+    // const u = ( ( x - this.x1 ) * px + ( y - this.y1 ) * py ) / D;
+
+    const A = ( x1 - this.x1 ) * normX + ( y1 - this.y1 ) * normY;
+    const B = ( x2 - this.x1 ) * normX + ( y2 - this.y1 ) * normY;
   }
 
   timeToHitLine( x1, y1, x2, y2, dx, dy, ax, ay ) {
+
+    const px = this.x2 - this.x1;
+    const py = this.y2 - this.y1;
+
+    const len = Math.hypot( px, py );
+    const normX = py / len;
+    const normY = -px / len;
+    
+    // Don't consider it a hit if we are moving away
+    const vDotN = dx * normX + dy * normY;
+    if ( vDotN > 0 ) {
+      return Infinity;
+    }
+
     // TODO: Already colliding? (do we care for this game?)
 
     const A = timeToPointHitLineAccel( x1, y1, dx, dy, ax, ay, this.x1, this.y1, this.x2, this.y2 );
@@ -180,8 +205,8 @@ function solveQuadratic( A, B, C ) {
       const t0 = ( -B - Math.sqrt( disc ) ) / ( 2 * A );
       const t1 = ( -B + Math.sqrt( disc ) ) / ( 2 * A );
       
-      if ( 0 < t0 && t0 < closest )   closest = t0;
-      if ( 0 < t1 && t1 < closest )   closest = t1;
+      if ( 0 <= t0 && t0 < closest )   closest = t0;
+      if ( 0 <= t1 && t1 < closest )   closest = t1;
     }
 
     return closest;

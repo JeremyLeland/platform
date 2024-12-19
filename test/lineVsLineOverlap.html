@@ -1,0 +1,83 @@
+<title>Validate line vs line function</title>
+<link rel="stylesheet" href="../style.css">
+
+<script type="module">
+
+import { Canvas } from '../src/common/Canvas.js';
+import { Line } from '../src/common/Line.js';
+import { ValuesPanel } from '../src/common/ValuesPanel.js';
+
+const line = new Line( 4, 3, 4, 4 );
+
+const vars = {
+  x1: 4,
+  y1: 5,
+  x2: 5,
+  y2: 2,
+  vx: -0.2,
+  vy:  0.1,
+  ax: 0,
+  ay: -0.001,
+}
+
+new ValuesPanel( vars ).valueChanged = _ => canvas.redraw();
+
+const canvas = new Canvas();
+canvas.zoom = 1 / 10;
+
+canvas.draw = ( ctx ) => {
+  ctx.lineWidth = 0.2 * canvas.zoom;
+
+  // Wall
+  ctx.strokeStyle = 'orange';
+  line.draw( ctx );
+
+  // Test segment
+  ctx.beginPath();
+  ctx.moveTo( vars.x1, vars.y1 );
+  ctx.lineTo( vars.x2, vars.y2 );
+  ctx.strokeStyle = 'white';
+  ctx.stroke();
+
+
+  // Find overlap
+  const px = line.x2 - line.x1;
+  const py = line.y2 - line.y1;
+  const D = ( px * px ) + ( py * py );
+
+  const len = Math.sqrt( D );
+  const normX = py / len;
+  const normY = -px / len;
+  
+  // const u = ( ( x - this.x1 ) * px + ( y - this.y1 ) * py ) / D;
+
+  // const B = ( vars.x2 - line.x1 ) * normX + ( vars.y2 - line.y1 ) * normY;
+  
+  [ [ vars.x1, vars.y1 ], [ vars.x2, vars.y2 ] ].forEach( p => {
+    const overlap = ( p[ 0 ] - line.x1 ) * normX + ( p[ 1 ] - line.y1 ) * normY;
+
+    ctx.beginPath();
+    ctx.moveTo( p[ 0 ], p[ 1 ] );
+    ctx.lineTo( p[ 0 ] - overlap * normX, p[ 1 ] - overlap * normY );
+    ctx.strokeStyle = overlap < 0 ? 'red' : 'green';
+    ctx.stroke();
+  } );
+
+  [ [ line.x1, line.y1 ], [ line.x2, line.y2 ] ].forEach( p => {
+    const normalAngle = Math.atan2( vars.x1 - vars.x2, vars.y2 - vars.y1 );
+    const normX = Math.cos( normalAngle );
+    const normY = Math.sin( normalAngle );
+    const overlap = ( p[ 0 ] - vars.x1 ) * normX + ( p[ 1 ] - vars.y1 ) * normY;
+
+    ctx.beginPath();
+    ctx.moveTo( p[ 0 ], p[ 1 ] );
+    ctx.lineTo( p[ 0 ] - overlap * normX, p[ 1 ] - overlap * normY );
+    ctx.strokeStyle = overlap < 0 ? 'red' : 'green';
+    ctx.stroke();
+  } );
+
+  
+  
+}
+
+</script>

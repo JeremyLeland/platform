@@ -16,6 +16,14 @@ export class World {
     y: 0,
     dx: 0,
     dy: 0,
+    ax: 0,
+    ay: 0,
+    bounds: [
+      [ -0.5, -0.5 ],
+      [ -0.5,  0.5 ],
+      [  0.5,  0.5 ],
+      [  0.5, -0.5 ],
+    ],
   };
 
   #level;
@@ -45,34 +53,71 @@ export class World {
 
   update( dt ) {
 
-    let closestLine = null, closestTime = dt;
+    this.player.ax = 0;
+    this.player.ay = Constants.Gravity;
 
-    // TODO: Make this bounding boxes instead of circle vs line
-    //         - Point vs line, but with accel
+    // TODO: Look for overlaps and back out of them instead of of timeToHit?
+    
+    this.player.x += this.player.dx * closestTime + 0.5 * this.player.ax * closestTime ** 2;
+    this.player.y += this.player.dy * closestTime + 0.5 * this.player.ay * closestTime ** 2;
+    this.player.dx += this.player.ax * closestTime;
+    this.player.dy += this.player.ay * closestTime;
 
     this.#lines.forEach( line => {
-      const time = line.timeToHit( this.player.x, this.player.y, this.player.dx, this.player.dy, Constants.Player.Radius );
-
-      if ( 0 <= time && time < closestTime ) {
-        closestLine = line;
-        closestTime = time;
-
-        // console.log( `${ JSON.stringify( this.player ) } will hit line ${ JSON.stringify( line ) } at ${ time }` );
-      }
+      
     } );
 
-    this.player.x += this.player.dx * closestTime;
-    this.player.y += this.player.dy * closestTime;// + 0.5 * Constants.Gravity * closestTime ** 2;
-    this.player.dy += Constants.Gravity * closestTime;
+    // for ( let tries = 0; tries < 5; tries ++ ) {
+
+    //   let closestLine = null, closestTime = dt;
+
+    //   this.#lines.forEach( line => {
+
+    //     for ( let i = 0; i < this.player.bounds.length; i ++ ) {
+    //       const current = this.player.bounds[ i ];
+    //       const next = this.player.bounds[ ( i + 1 ) % this.player.bounds.length ];
+
+    //       const time = line.timeToHitLine( 
+    //         this.player.x + current[ 0 ], 
+    //         this.player.y + current[ 1 ], 
+    //         this.player.x + next[ 0 ], 
+    //         this.player.y + next[ 1 ],
+    //         this.player.dx, 
+    //         this.player.dy, 
+    //         this.player.ax, 
+    //         this.player.ay,
+    //       );
+
+    //       // Exclude zero so we aren't stopped by lines we already stopped at
+    //       if ( 0 <= time && time < closestTime ) {
+    //         closestLine = line;
+    //         closestTime = time;
+    
+    //         // console.log( `${ JSON.stringify( this.player ) } will hit line ${ JSON.stringify( line ) } at ${ time }` );
+    //       }
+    //     }
+
+    //   } );
+
+    //   this.player.x += this.player.dx * closestTime + 0.5 * this.player.ax * closestTime ** 2;
+    //   this.player.y += this.player.dy * closestTime + 0.5 * this.player.ay * closestTime ** 2;
+    //   this.player.dx += this.player.ax * closestTime;
+    //   this.player.dy += this.player.ay * closestTime;
 
 
-    // TODO: Only vertical lines should stop player. Take normal into account?
+    //   // TODO: Only vertical lines should stop player. Take normal into account?
+    //   if ( closestLine ) {
+    //     this.player.dy = 0;
+    //     this.player.ay = 0;
+    //   }
 
-    if ( closestLine ) {
-      this.player.dy = 0;
-    }
+    //   dt -= closestTime;
 
-    // TODO: Rest of update?
+    //   if ( dt <= 0 ) {
+    //     break;
+    //   }
+
+    // }
 
   }
 
@@ -87,7 +132,8 @@ export class World {
     ctx.strokeStyle = 'black';
 
     ctx.beginPath();
-    ctx.arc( 0, 0, Constants.Player.Radius, 0, Math.PI * 2 );
+    
+    this.player.bounds.forEach( b => ctx.lineTo( b[ 0 ], b[ 1 ] ) );
 
     ctx.fill();
     ctx.stroke();
