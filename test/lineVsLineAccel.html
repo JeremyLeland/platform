@@ -17,7 +17,7 @@ const vars = {
   vx: -0.2,
   vy:  0.1,
   ax: 0,
-  ay: 0.001,
+  ay: -0.001,
 }
 
 new ValuesPanel( vars ).valueChanged = _ => canvas.redraw();
@@ -31,6 +31,21 @@ canvas.draw = ( ctx ) => {
   // Wall
   ctx.strokeStyle = 'orange';
   line.draw( ctx );
+
+  ctx.strokeStyle = 'brown';
+  ctx.setLineDash( [ 0.1, 0.1 ] );
+
+  [ [ line.x1, line.y1 ], [ line.x2, line.y2 ] ].forEach( p => {
+    ctx.beginPath();
+    for ( let t = 0; t <= 20; t += 1 ) {
+      const x = p[ 0 ] + -vars.vx * t + 0.5 * -vars.ax * t ** 2;
+      const y = p[ 1 ] + -vars.vy * t + 0.5 * -vars.ay * t ** 2;
+      ctx.lineTo( x, y );
+    }
+    ctx.stroke();
+  } );
+
+  ctx.setLineDash( [] );
 
   // Test segment
   ctx.beginPath();

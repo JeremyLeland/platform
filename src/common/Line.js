@@ -74,7 +74,6 @@ export class Line {
     const A = timeToPointHitLineAccel( x1, y1, dx, dy, ax, ay, this.x1, this.y1, this.x2, this.y2 );
     const B = timeToPointHitLineAccel( x2, y2, dx, dy, ax, ay, this.x1, this.y1, this.x2, this.y2 );
 
-    // TODO: Is this as simple as negative accerlation? Or something more?
     const C = timeToPointHitLineAccel( this.x1, this.y1, -dx, -dy, -ax, -ay, x1, y1, x2, y2 );
     const D = timeToPointHitLineAccel( this.x2, this.y2, -dx, -dy, -ax, -ay, x1, y1, x2, y2 );
 
@@ -175,14 +174,16 @@ function solveQuadratic( A, B, C ) {
   else {
     const disc = B * B - 4 * A * C;
 
-    if ( disc < 0 ) {
-      return Infinity;
-    }
-    else {
+    let closest = Infinity;
+
+    if ( disc >= 0 ) {
       const t0 = ( -B - Math.sqrt( disc ) ) / ( 2 * A );
       const t1 = ( -B + Math.sqrt( disc ) ) / ( 2 * A );
       
-      return t0 < 0 ? t1 : t0;
+      if ( 0 < t0 && t0 < closest )   closest = t0;
+      if ( 0 < t1 && t1 < closest )   closest = t1;
     }
+
+    return closest;
   }
 }
