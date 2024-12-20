@@ -77,6 +77,8 @@ export class Line {
 
     const A = ( x1 - this.x1 ) * normX + ( y1 - this.y1 ) * normY;
     const B = ( x2 - this.x1 ) * normX + ( y2 - this.y1 ) * normY;
+
+    // TODO: In progress, testing in lineVsLineOverlap first
   }
 
   timeToHitLine( x1, y1, x2, y2, dx, dy, ax, ay ) {

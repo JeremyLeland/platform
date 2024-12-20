@@ -48,32 +48,53 @@ canvas.draw = ( ctx ) => {
   const len = Math.sqrt( D );
   const normX = py / len;
   const normY = -px / len;
-  
-  // const u = ( ( x - this.x1 ) * px + ( y - this.y1 ) * py ) / D;
 
   // const B = ( vars.x2 - line.x1 ) * normX + ( vars.y2 - line.y1 ) * normY;
   
   [ [ vars.x1, vars.y1 ], [ vars.x2, vars.y2 ] ].forEach( p => {
-    const overlap = ( p[ 0 ] - line.x1 ) * normX + ( p[ 1 ] - line.y1 ) * normY;
+    
+    
+    const u = ( ( p[ 0 ] - line.x1 ) * px + ( p[ 1 ] - line.y1 ) * py ) / D;
 
-    ctx.beginPath();
-    ctx.moveTo( p[ 0 ], p[ 1 ] );
-    ctx.lineTo( p[ 0 ] - overlap * normX, p[ 1 ] - overlap * normY );
-    ctx.strokeStyle = overlap < 0 ? 'red' : 'green';
-    ctx.stroke();
+    if ( 0 <= u && u <= 1 ) {
+      const overlap = ( p[ 0 ] - line.x1 ) * normX + ( p[ 1 ] - line.y1 ) * normY;
+      
+      ctx.beginPath();
+      ctx.moveTo( p[ 0 ], p[ 1 ] );
+      ctx.lineTo( p[ 0 ] - normX * overlap, p[ 1 ] - normY * overlap );
+      ctx.strokeStyle = overlap < 0 ? 'red' : 'green';
+      ctx.stroke();
+    }
   } );
 
-  [ [ line.x1, line.y1 ], [ line.x2, line.y2 ] ].forEach( p => {
-    const normalAngle = Math.atan2( vars.x1 - vars.x2, vars.y2 - vars.y1 );
-    const normX = Math.cos( normalAngle );
-    const normY = Math.sin( normalAngle );
-    const overlap = ( p[ 0 ] - vars.x1 ) * normX + ( p[ 1 ] - vars.y1 ) * normY;
+  // Can't use the same trick here -- want to know intersection of normal and line
 
-    ctx.beginPath();
-    ctx.moveTo( p[ 0 ], p[ 1 ] );
-    ctx.lineTo( p[ 0 ] - overlap * normX, p[ 1 ] - overlap * normY );
-    ctx.strokeStyle = overlap < 0 ? 'red' : 'green';
-    ctx.stroke();
+  [ [ line.x1, line.y1 ], [ line.x2, line.y2 ] ].forEach( p => {
+
+    const x1 = p[ 0 ];
+    const y1 = p[ 1 ];
+    const x2 = x1 + normX;
+    const y2 = y1 + normY;
+
+    const x3 = vars.x1;
+    const y3 = vars.y1;
+    const x4 = vars.x2;
+    const y4 = vars.y2;
+
+    const D = ( y4 - y3 ) * ( x2 - x1 ) - ( x4 - x3 ) * ( y2 - y1 );
+
+    if ( D != 0 ) {
+      const uA = ( ( x4 - x3 ) * ( y1 - y3 ) - ( y4 - y3 ) * ( x1 - x3 ) ) / D;
+      const uB = ( ( x2 - x1 ) * ( y1 - y3 ) - ( y2 - y1 ) * ( x1 - x3 ) ) / D;
+
+      if ( 0 <= uB && uB <= 1 ) {
+        ctx.beginPath();
+        ctx.moveTo( p[ 0 ], p[ 1 ] );
+        ctx.lineTo( p[ 0 ] + normX * uA, p[ 1 ] + normY * uA );
+        ctx.strokeStyle = uA < 0 ? 'red' : 'green';
+        ctx.stroke();
+      }
+    }
   } );
 
   
