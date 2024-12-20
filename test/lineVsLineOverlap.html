@@ -57,19 +57,14 @@ canvas.draw = ( ctx ) => {
     const x4 = line.x2;
     const y4 = line.y2;
 
-    const D = ( y4 - y3 ) * ( x2 - x1 ) - ( x4 - x3 ) * ( y2 - y1 );
+    const overlap = getOverlap( x1, y1, x2, y2, x3, y3, x4, y4 );
 
-    if ( D != 0 ) {
-      const uA = ( ( x4 - x3 ) * ( y1 - y3 ) - ( y4 - y3 ) * ( x1 - x3 ) ) / D;
-      const uB = ( ( x2 - x1 ) * ( y1 - y3 ) - ( y2 - y1 ) * ( x1 - x3 ) ) / D;
-
-      if ( 0 <= uB && uB <= 1 ) {
-        ctx.beginPath();
-        ctx.moveTo( x1, y1 );
-        ctx.lineTo( x1 - normX * uA, y1 - normY * uA );
-        ctx.strokeStyle = uA < 0 ? 'red' : 'green';
-        ctx.stroke();
-      }
+    if ( overlap < Infinity ) {
+      ctx.beginPath();
+      ctx.moveTo( x1, y1 );
+      ctx.lineTo( x1 - normX * overlap, y1 - normY * overlap );
+      ctx.strokeStyle = overlap < 0 ? 'red' : 'green';
+      ctx.stroke();
     }
   } );
 
@@ -87,24 +82,39 @@ canvas.draw = ( ctx ) => {
     const x4 = vars.x2;
     const y4 = vars.y2;
 
-    const D = ( y4 - y3 ) * ( x2 - x1 ) - ( x4 - x3 ) * ( y2 - y1 );
+    const overlap = getOverlap( x1, y1, x2, y2, x3, y3, x4, y4 );
 
-    if ( D != 0 ) {
-      const uA = ( ( x4 - x3 ) * ( y1 - y3 ) - ( y4 - y3 ) * ( x1 - x3 ) ) / D;
-      const uB = ( ( x2 - x1 ) * ( y1 - y3 ) - ( y2 - y1 ) * ( x1 - x3 ) ) / D;
-
-      if ( 0 <= uB && uB <= 1 ) {
-        ctx.beginPath();
-        ctx.moveTo( x1, y1 );
-        ctx.lineTo( x1 + normX * uA, y1 + normY * uA );
-        ctx.strokeStyle = uA < 0 ? 'red' : 'green';
-        ctx.stroke();
-      }
+    if ( overlap < Infinity ) {
+      ctx.beginPath();
+      ctx.moveTo( x1, y1 );
+      ctx.lineTo( x1 + normX * overlap, y1 + normY * overlap );
+      ctx.strokeStyle = overlap < 0 ? 'red' : 'green';
+      ctx.stroke();
     }
   } );
 
   
   
+}
+
+function getOverlap( x1, y1, x2, y2, x3, y3, x4, y4 ) {
+  const D = ( y4 - y3 ) * ( x2 - x1 ) - ( x4 - x3 ) * ( y2 - y1 );
+
+  if ( D != 0 ) {
+    const uA = ( ( x4 - x3 ) * ( y1 - y3 ) - ( y4 - y3 ) * ( x1 - x3 ) ) / D;
+    const uB = ( ( x2 - x1 ) * ( y1 - y3 ) - ( y2 - y1 ) * ( x1 - x3 ) ) / D;
+
+    if ( 0 <= uB && uB <= 1 ) {
+      return uA;
+    }
+  }
+  else {
+    debugger;
+    // Looks like this happens if comparison line is parallel to normal
+    // Seems like I still get an overlap from the line in this case, so maybe it's ok to just return infinity
+  }
+
+  return Infinity;
 }
 
 </script>
