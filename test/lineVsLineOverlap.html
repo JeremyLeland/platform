@@ -41,29 +41,35 @@ canvas.draw = ( ctx ) => {
 
 
   // Find overlap
-  const px = line.x2 - line.x1;
-  const py = line.y2 - line.y1;
-  const D = ( px * px ) + ( py * py );
+  const normalAngle = line.normalAngle();
+  const normX = Math.cos( normalAngle );
+  const normY = Math.sin( normalAngle );
 
-  const len = Math.sqrt( D );
-  const normX = py / len;
-  const normY = -px / len;
-
-  // const B = ( vars.x2 - line.x1 ) * normX + ( vars.y2 - line.y1 ) * normY;
   
-  [ [ vars.x1, vars.y1 ], [ vars.x2, vars.y2 ] ].forEach( p => {
-    
-    
-    const u = ( ( p[ 0 ] - line.x1 ) * px + ( p[ 1 ] - line.y1 ) * py ) / D;
+  [ [ vars.x1, vars.y1 ], [ vars.x2, vars.y2 ] ].forEach( p => {  
+    const x1 = p[ 0 ];
+    const y1 = p[ 1 ];
+    const x2 = x1 - normX;
+    const y2 = y1 - normY;
 
-    if ( 0 <= u && u <= 1 ) {
-      const overlap = ( p[ 0 ] - line.x1 ) * normX + ( p[ 1 ] - line.y1 ) * normY;
-      
-      ctx.beginPath();
-      ctx.moveTo( p[ 0 ], p[ 1 ] );
-      ctx.lineTo( p[ 0 ] - normX * overlap, p[ 1 ] - normY * overlap );
-      ctx.strokeStyle = overlap < 0 ? 'red' : 'green';
-      ctx.stroke();
+    const x3 = line.x1;
+    const y3 = line.y1;
+    const x4 = line.x2;
+    const y4 = line.y2;
+
+    const D = ( y4 - y3 ) * ( x2 - x1 ) - ( x4 - x3 ) * ( y2 - y1 );
+
+    if ( D != 0 ) {
+      const uA = ( ( x4 - x3 ) * ( y1 - y3 ) - ( y4 - y3 ) * ( x1 - x3 ) ) / D;
+      const uB = ( ( x2 - x1 ) * ( y1 - y3 ) - ( y2 - y1 ) * ( x1 - x3 ) ) / D;
+
+      if ( 0 <= uB && uB <= 1 ) {
+        ctx.beginPath();
+        ctx.moveTo( x1, y1 );
+        ctx.lineTo( x1 - normX * uA, y1 - normY * uA );
+        ctx.strokeStyle = uA < 0 ? 'red' : 'green';
+        ctx.stroke();
+      }
     }
   } );
 
@@ -89,8 +95,8 @@ canvas.draw = ( ctx ) => {
 
       if ( 0 <= uB && uB <= 1 ) {
         ctx.beginPath();
-        ctx.moveTo( p[ 0 ], p[ 1 ] );
-        ctx.lineTo( p[ 0 ] + normX * uA, p[ 1 ] + normY * uA );
+        ctx.moveTo( x1, y1 );
+        ctx.lineTo( x1 + normX * uA, y1 + normY * uA );
         ctx.strokeStyle = uA < 0 ? 'red' : 'green';
         ctx.stroke();
       }
