@@ -10,7 +10,7 @@ import { ValuesPanel } from '../src/common/ValuesPanel.js';
 const line = new Line( 4, 3, 4, 4 );
 
 const vars = {
-  x1: 4,
+  x1: 3,
   y1: 5,
   x2: 5,
   y2: 2,
@@ -107,7 +107,17 @@ canvas.draw = ( ctx ) => {
     ctx.setLineDash( [ ] );
   }
 
-  // TODO: Move this code to Line so we can use it for checking against blocks in loadWorld
+  const testOverlap = line.getOverlap( vars.x1, vars.y1, vars.x2, vars.y2 );
+
+  if ( testOverlap < 0 ) {
+    ctx.beginPath();
+    ctx.moveTo( vars.x1 - normX * testOverlap, vars.y1 - normY * testOverlap );
+    ctx.lineTo( vars.x2 - normX * testOverlap, vars.y2 - normY * testOverlap );
+    ctx.strokeStyle = 'blue';
+    ctx.setLineDash( [ 0.05, 0.05 ] );
+    ctx.stroke();
+    ctx.setLineDash( [ ] );
+  }
   
 }
 

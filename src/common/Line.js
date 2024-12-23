@@ -65,20 +65,45 @@ export class Line {
   }
 
   getOverlap( x1, y1, x2, y2 ) {
-    const px = this.x2 - this.x1;
-    const py = this.y2 - this.y1;
-    const D = ( px * px ) + ( py * py );
-
-    const len = Math.sqrt( D );
-    const normX = py / len;
-    const normY = -px / len;
+    const normalAngle = this.normalAngle();
+    const normX = Math.cos( normalAngle );
+    const normY = Math.sin( normalAngle );
     
-    // const u = ( ( x - this.x1 ) * px + ( y - this.y1 ) * py ) / D;
+    let mostOverlap = Infinity;
 
-    const A = ( x1 - this.x1 ) * normX + ( y1 - this.y1 ) * normY;
-    const B = ( x2 - this.x1 ) * normX + ( y2 - this.y1 ) * normY;
+    [ [ x1, y1 ], [ x2, y2 ] ].forEach( p => {  
+      
+      const overlap = getLineOverlap( 
+        p[ 0 ],
+        p[ 1 ],
+        p[ 0 ] - normX,
+        p[ 1 ] - normY,
+        this.x1,
+        this.y1,
+        this.x2,
+        this.y2,
+      );
 
-    // TODO: In progress, testing in lineVsLineOverlap first
+      mostOverlap = Math.min( overlap, mostOverlap );
+    } );
+
+    [ [ this.x1, this.y1 ], [ this.x2, this.y2 ] ].forEach( p => {
+
+      const overlap = getLineOverlap( 
+        p[ 0 ],
+        p[ 1 ],
+        p[ 0 ] + normX,
+        p[ 1 ] + normY,
+        x1,
+        y1,
+        x2,
+        y2,  
+      );
+
+      mostOverlap = Math.min( overlap, mostOverlap );
+    } );
+
+    return mostOverlap;    
   }
 
   timeToHitLine( x1, y1, x2, y2, dx, dy, ax, ay ) {
@@ -148,6 +173,26 @@ export class Line {
       return hitTime;
     }
   }
+}
+
+function getLineOverlap( x1, y1, x2, y2, x3, y3, x4, y4 ) {
+  const D = ( y4 - y3 ) * ( x2 - x1 ) - ( x4 - x3 ) * ( y2 - y1 );
+
+  if ( D != 0 ) {
+    const uA = ( ( x4 - x3 ) * ( y1 - y3 ) - ( y4 - y3 ) * ( x1 - x3 ) ) / D;
+    const uB = ( ( x2 - x1 ) * ( y1 - y3 ) - ( y2 - y1 ) * ( x1 - x3 ) ) / D;
+
+    if ( 0 <= uB && uB <= 1 ) {
+      return uA;
+    }
+  }
+  // else {
+  //   debugger;
+  //   // Looks like this happens if comparison line is parallel to normal
+  //   // Seems like I still get an overlap from the line in this case, so maybe it's ok to just return infinity
+  // }
+
+  return Infinity;
 }
 
 function timeToPointHitLineAccel( sx, sy, vx, vy, ax, ay, px, py, qx, qy ) {
