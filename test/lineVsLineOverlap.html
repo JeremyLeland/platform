@@ -46,6 +46,8 @@ canvas.draw = ( ctx ) => {
   const normY = Math.sin( normalAngle );
 
   
+  let mostOverlap = Infinity;
+
   [ [ vars.x1, vars.y1 ], [ vars.x2, vars.y2 ] ].forEach( p => {  
     const x1 = p[ 0 ];
     const y1 = p[ 1 ];
@@ -66,9 +68,9 @@ canvas.draw = ( ctx ) => {
       ctx.strokeStyle = overlap < 0 ? 'red' : 'green';
       ctx.stroke();
     }
-  } );
 
-  // Can't use the same trick here -- want to know intersection of normal and line
+    mostOverlap = Math.min( overlap, mostOverlap );
+  } );
 
   [ [ line.x1, line.y1 ], [ line.x2, line.y2 ] ].forEach( p => {
 
@@ -91,9 +93,21 @@ canvas.draw = ( ctx ) => {
       ctx.strokeStyle = overlap < 0 ? 'red' : 'green';
       ctx.stroke();
     }
+
+    mostOverlap = Math.min( overlap, mostOverlap );
   } );
 
-  
+  if ( mostOverlap < 0 ) {
+    ctx.beginPath();
+    ctx.moveTo( vars.x1 - normX * mostOverlap, vars.y1 - normY * mostOverlap );
+    ctx.lineTo( vars.x2 - normX * mostOverlap, vars.y2 - normY * mostOverlap );
+    ctx.strokeStyle = 'gray';
+    ctx.setLineDash( [ 0.1, 0.1 ] );
+    ctx.stroke();
+    ctx.setLineDash( [ ] );
+  }
+
+  // TODO: Move this code to Line so we can use it for checking against blocks in loadWorld
   
 }
 
@@ -108,11 +122,11 @@ function getOverlap( x1, y1, x2, y2, x3, y3, x4, y4 ) {
       return uA;
     }
   }
-  else {
-    debugger;
-    // Looks like this happens if comparison line is parallel to normal
-    // Seems like I still get an overlap from the line in this case, so maybe it's ok to just return infinity
-  }
+  // else {
+  //   debugger;
+  //   // Looks like this happens if comparison line is parallel to normal
+  //   // Seems like I still get an overlap from the line in this case, so maybe it's ok to just return infinity
+  // }
 
   return Infinity;
 }
