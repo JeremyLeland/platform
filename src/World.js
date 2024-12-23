@@ -56,16 +56,52 @@ export class World {
     this.player.ax = 0;
     this.player.ay = Constants.Gravity;
 
-    // TODO: Look for overlaps and back out of them instead of of timeToHit?
-    
-    this.player.x += this.player.dx * closestTime + 0.5 * this.player.ax * closestTime ** 2;
-    this.player.y += this.player.dy * closestTime + 0.5 * this.player.ay * closestTime ** 2;
-    this.player.dx += this.player.ax * closestTime;
-    this.player.dy += this.player.ay * closestTime;
+    this.player.x += this.player.dx * dt + 0.5 * this.player.ax * dt ** 2;
+    this.player.y += this.player.dy * dt + 0.5 * this.player.ay * dt ** 2;
+    this.player.dx += this.player.ax * dt;
+    this.player.dy += this.player.ay * dt;
+
+    // TODO: These names are terribly confusing. Need a better term for this. LineDistance?
+    let leastOverlap = -Infinity, leastLine = null;
 
     this.#lines.forEach( line => {
+      let worstOverlap = Infinity;
+
+      for ( let i = 0; i < this.player.bounds.length; i ++ ) {
+        const current = this.player.bounds[ i ];
+        const next = this.player.bounds[ ( i + 1 ) % this.player.bounds.length ];
+
+        const overlap = line.getOverlap( 
+          this.player.x + current[ 0 ], 
+          this.player.y + current[ 1 ], 
+          this.player.x + next[ 0 ], 
+          this.player.y + next[ 1 ],
+        );
+
+        if ( -1 <= overlap && overlap < worstOverlap ) {
+          worstOverlap = Math.min( overlap, worstOverlap );
+        }
+      }
       
+      if ( leastOverlap < worstOverlap && worstOverlap < 0) {
+        leastOverlap = worstOverlap;
+        leastLine = line;
+      }
     } );
+
+    if ( leastOverlap > -Infinity ) {
+      const normalAngle = leastLine.getNormalAngle();
+      const normX = Math.cos( normalAngle );
+      const normY = Math.sin( normalAngle );
+
+      this.player.x -= normX * leastOverlap;
+      this.player.y -= normY * leastOverlap;
+
+      // TODO: Base on normal
+      // this.player.dx = 0;
+      this.player.dy = 0;
+    }
+    
 
     // for ( let tries = 0; tries < 5; tries ++ ) {
 

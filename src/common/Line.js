@@ -6,15 +6,15 @@ export class Line {
     this.y2 = y2;
   }
   
-  length() {
+  getLength() {
     return Math.hypot( this.x2 - this.x1, this.y2 - this.y1 );
   }
 
-  slopeAngle() {
+  getSlopeAngle() {
     return Math.atan2( this.y2 - this.y1, this.x2 - this.x1 );
   }
 
-  normalAngle() {
+  getNormalAngle() {
     return Math.atan2( this.x1 - this.x2, this.y2 - this.y1 );
   }
 
@@ -27,7 +27,7 @@ export class Line {
 
     const midX = ( this.x1 + this.x2 ) / 2;
     const midY = ( this.y1 + this.y2 ) / 2;
-    const normalAngle = this.normalAngle();
+    const normalAngle = this.getNormalAngle();
     const NORM_LEN = 0.5;
 
     ctx.beginPath();
@@ -65,7 +65,7 @@ export class Line {
   }
 
   getOverlap( x1, y1, x2, y2 ) {
-    const normalAngle = this.normalAngle();
+    const normalAngle = this.getNormalAngle();
     const normX = Math.cos( normalAngle );
     const normY = Math.sin( normalAngle );
     
