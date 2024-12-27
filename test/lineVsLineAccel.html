@@ -10,14 +10,14 @@ import { ValuesPanel } from '../src/common/ValuesPanel.js';
 const line = new Line( 8, 3, 8, 4 );
 
 const vars = {
-  x1: 5,
-  y1: 2,
-  x2: 5,
-  y2: 4,
-  vx: -0.2,
-  vy:  0.1,
+  x1: 6,
+  y1: 3,
+  x2: 9,
+  y2: 3,
+  vx: 0,
+  vy: -0.1,
   ax: 0,
-  ay: -0.001,
+  ay: 0.004,
 }
 
 new ValuesPanel( vars ).valueChanged = _ => canvas.redraw();

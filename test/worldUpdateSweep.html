@@ -1,0 +1,44 @@
+<title>Sweep test world update</title>
+<link rel="stylesheet" href="../style.css">
+
+<script type="module">
+  
+  import { Canvas } from '../src/common/Canvas.js';
+  import { Constants, World } from '../src/World.js';
+  import { ValuesPanel } from '../src/common/ValuesPanel.js';
+
+  new ValuesPanel( Constants );
+
+  const levelJSON = await ( await fetch( './levels/test3.json' ) ).json()
+  let world = new World( levelJSON );
+
+  //
+  // Canvas
+  //
+
+  const canvas = new Canvas();
+  canvas.backgroundColor = 'dodgerblue';
+  canvas.lineWidth = 0.02;
+  canvas.zoom = 1 / 10;
+  canvas.scrollX = -5;
+  canvas.scrollY = -5;
+
+  canvas.update = ( dt ) => {
+    world.updateSweep( dt );
+
+    // TODO: Update scroll to center player
+    canvas.scrollX = world.player.x - 5;
+    canvas.scrollY = world.player.y - 5;
+  }
+
+  canvas.draw = ( ctx ) => {
+    world.draw( ctx );
+  }
+
+  canvas.start();
+
+  document.addEventListener( 'keydown', e => world.keyDown( e ) );
+  document.addEventListener( 'keyup',   e => world.keyUp( e ) );
+
+  
+</script>

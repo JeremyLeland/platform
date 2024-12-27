@@ -64,6 +64,32 @@ export class Line {
     }
   }
 
+  getAngleToLine( x1, y1, x2, y2 ) {
+    const px = this.x2 - this.x1;
+    const py = this.y2 - this.y1;
+    const D = ( px * px ) + ( py * py );
+
+    const u1 = ( ( x1 - this.x1 ) * px + ( y1 - this.y1 ) * py ) / D;
+    const u2 = ( ( x2 - this.x1 ) * px + ( y2 - this.y1 ) * py ) / D;
+
+    // If point 1 and point 2 are on different sides of line, then use normal
+    // If they are on same side, then use closest point
+    
+    if ( u1 <= 0 && u2 <= 0 ) {
+      return this.getNormalAngle() - Math.PI / 2;
+      // return u1 < u2 ? Math.atan2( y2 - this.y1, x2 - this.x1 ) : 
+      //                  Math.atan2( y1 - this.y1, x1 - this.x1 );
+    }
+    else if ( 1 <= u1 && 1 <= u2 ) {
+      return this.getNormalAngle() + Math.PI / 2;
+      // return u1 < u2 ? Math.atan2( y1 - this.y2, x1 - this.x2 ) :
+      //                  Math.atan2( y2 - this.y2, y2 - this.x2 );
+    }
+    else {
+      return this.getNormalAngle();
+    }
+  }
+
   getOverlap( x1, y1, x2, y2 ) {
     const normalAngle = this.getNormalAngle();
     const normX = Math.cos( normalAngle );
@@ -107,16 +133,24 @@ export class Line {
   }
 
   timeToHitLine( x1, y1, x2, y2, dx, dy, ax, ay ) {
+    // const normalAngle = this.getNormalAngle();
 
-    const px = this.x2 - this.x1;
-    const py = this.y2 - this.y1;
-
-    const len = Math.hypot( px, py );
-    const normX = py / len;
-    const normY = -px / len;
+    
+    const normalAngle = this.getAngleToLine( x1, y1, x2, y2 );
+    const normX = Math.cos( normalAngle );
+    const normY = Math.sin( normalAngle );
     
     // Don't consider it a hit if we are moving away
+
+    // TODO: How about case where horizontal line is moving away from edge of vertical line?
+    //       Try using angle to point, which is normal unless point is closer to edges (then its angle from edge to point)
+
     const vDotN = dx * normX + dy * normY;
+
+    // if ( vDotN != 0 ) {
+    //   console.log( 'vDotN = ' + vDotN );
+    // }
+
     if ( vDotN > 0 ) {
       return Infinity;
     }
@@ -244,9 +278,14 @@ function solveQuadratic( A, B, C ) {
     return -C / B;
   }
   else {
-    const disc = B * B - 4 * A * C;
+    let disc = B * B - 4 * A * C;
 
     let closest = Infinity;
+
+    if ( -EPSILON < disc && disc < 0 ) {
+      disc = 0;
+      // debugger;
+    }
 
     if ( disc >= 0 ) {
       const t0 = ( -B - Math.sqrt( disc ) ) / ( 2 * A );

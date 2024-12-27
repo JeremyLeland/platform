@@ -52,7 +52,15 @@ export class World {
   }
 
   update( dt ) {
+    // TODO: Figure out best method below
+  }
 
+
+  //
+  // Try overlap tests to move player out of collisions with ground
+  //
+
+  updateOverlap( dt ) {
     this.player.ax = 0;
     this.player.ay = Constants.Gravity;
 
@@ -101,59 +109,84 @@ export class World {
       // this.player.dx = 0;
       this.player.dy = 0;
     }
-    
+  }
 
-    // for ( let tries = 0; tries < 5; tries ++ ) {
+  //
+  // Try sweep tests to see when player would hit ground
+  //
 
-    //   let closestLine = null, closestTime = dt;
+  updateSweep( dt ) {
+    // console.log( `updateSweep( ${ dt } )` );
 
-    //   this.#lines.forEach( line => {
+    this.player.ax = 0;
+    this.player.ay = Constants.Gravity;
 
-    //     for ( let i = 0; i < this.player.bounds.length; i ++ ) {
-    //       const current = this.player.bounds[ i ];
-    //       const next = this.player.bounds[ ( i + 1 ) % this.player.bounds.length ];
+    const skipLines = new Set();
 
-    //       const time = line.timeToHitLine( 
-    //         this.player.x + current[ 0 ], 
-    //         this.player.y + current[ 1 ], 
-    //         this.player.x + next[ 0 ], 
-    //         this.player.y + next[ 1 ],
-    //         this.player.dx, 
-    //         this.player.dy, 
-    //         this.player.ax, 
-    //         this.player.ay,
-    //       );
+    for ( let tries = 0; tries < 5; tries ++ ) {
+      // console.log( JSON.stringify( this.player ) );
 
-    //       // Exclude zero so we aren't stopped by lines we already stopped at
-    //       if ( 0 <= time && time < closestTime ) {
-    //         closestLine = line;
-    //         closestTime = time;
-    
-    //         // console.log( `${ JSON.stringify( this.player ) } will hit line ${ JSON.stringify( line ) } at ${ time }` );
-    //       }
-    //     }
+      let closestLine = null, closestTime = dt, closestBoundsIndex = -1;
 
-    //   } );
+      this.#lines.filter( line => !skipLines.has( line ) ).forEach( line => {
 
-    //   this.player.x += this.player.dx * closestTime + 0.5 * this.player.ax * closestTime ** 2;
-    //   this.player.y += this.player.dy * closestTime + 0.5 * this.player.ay * closestTime ** 2;
-    //   this.player.dx += this.player.ax * closestTime;
-    //   this.player.dy += this.player.ay * closestTime;
+        for ( let i = 0; i < this.player.bounds.length; i ++ ) {
+          const current = this.player.bounds[ i ];
+          const next = this.player.bounds[ ( i + 1 ) % this.player.bounds.length ];
 
+          const time = line.timeToHitLine( 
+            this.player.x + current[ 0 ], 
+            this.player.y + current[ 1 ], 
+            this.player.x + next[ 0 ], 
+            this.player.y + next[ 1 ],
+            this.player.dx, 
+            this.player.dy, 
+            this.player.ax, 
+            this.player.ay,
+          );
 
-    //   // TODO: Only vertical lines should stop player. Take normal into account?
-    //   if ( closestLine ) {
-    //     this.player.dy = 0;
-    //     this.player.ay = 0;
-    //   }
+          // console.log( `---Bounds ${ i } will hit line ${ JSON.stringify( line ) } at ${ time }` );
 
-    //   dt -= closestTime;
+          if ( -dt <= time && time < closestTime ) {
+            closestLine = line;
+            closestTime = time;
+            closestBoundsIndex = i;
+          }
+        }
+      } );
 
-    //   if ( dt <= 0 ) {
-    //     break;
-    //   }
+      this.player.x += this.player.dx * closestTime + 0.5 * this.player.ax * closestTime ** 2;
+      this.player.y += this.player.dy * closestTime + 0.5 * this.player.ay * closestTime ** 2;
+      this.player.dx += this.player.ax * closestTime;
+      this.player.dy += this.player.ay * closestTime;
 
-    // }
+      // TODO: Often fall through. Why does going right guarentee we fall through? (but not left)
+      // NOTE: I think the sides of the bounding box are throwing this off. If the bottom is past
+      //       our goal, then it seems to use the top line's hit
+      //       Is this because we are returning the lowest positive hit time? Maybe we need to return both values, so we can recognize slight over-shoots
+      //       Or just include slight overshoots in the range of values returned?
+
+      if ( closestLine ) {
+
+        // console.log( `Bounds ${ closestBoundsIndex } will hit line ${ JSON.stringify( closestLine ) } at ${ closestTime }` );
+
+        this.player.dy = 0;
+        this.player.ay = 0;
+
+        skipLines.add( closestLine );
+      }
+      else {
+        // console.log( `No hits found within dt of ${ dt }, updating rest of way` );
+      }
+
+      dt -= closestTime;
+
+      if ( dt <= 0 ) {
+        // console.log( 'Ending update' );
+        break;
+      }
+
+    }
 
   }
 
