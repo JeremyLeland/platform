@@ -116,7 +116,7 @@ export class World {
   //
 
   updateSweep( dt ) {
-    // console.log( `updateSweep( ${ dt } )` );
+    log( 'collision', `updateSweep( ${ dt } )` );
 
     this.player.ax = 0;
     this.player.ay = Constants.Gravity;
@@ -124,7 +124,7 @@ export class World {
     const skipLines = new Set();
 
     for ( let tries = 0; tries < 5; tries ++ ) {
-      // console.log( JSON.stringify( this.player ) );
+      log( 'collision', JSON.stringify( this.player ) );
 
       let closestLine = null, closestTime = dt, closestBoundsIndex = -1;
 
@@ -145,7 +145,7 @@ export class World {
             this.player.ay,
           );
 
-          // console.log( `---Bounds ${ i } will hit line ${ JSON.stringify( line ) } at ${ time }` );
+          log( 'collision', `---Bounds ${ i } will hit line ${ JSON.stringify( line ) } at ${ time }` );
 
           if ( 0 <= time && time < closestTime ) {
             closestLine = line;
@@ -161,7 +161,7 @@ export class World {
       this.player.dy += this.player.ay * closestTime;
       
       if ( closestLine ) {
-        // console.log( `Bounds ${ closestBoundsIndex } will hit line ${ JSON.stringify( closestLine ) } at ${ closestTime }` );
+        log( 'collision', `Bounds ${ closestBoundsIndex } will hit line ${ JSON.stringify( closestLine ) } at ${ closestTime }` );
 
         this.player.dy = 0;
         this.player.ay = 0;
@@ -169,13 +169,13 @@ export class World {
         skipLines.add( closestLine );
       }
       else {
-        // console.log( `No hits found within dt of ${ dt }, updating rest of way` );
+        log( 'collision', `No hits found within dt of ${ dt }, updating rest of way` );
       }
 
       dt -= closestTime;
 
       if ( dt <= 0 ) {
-        // console.log( 'Ending update' );
+        log( 'collision', 'Ending update' );
         break;
       }
 
@@ -219,4 +219,8 @@ export class World {
       this.player.dx = 0;
     }
   }
+}
+
+function log( category, message ) {
+  // console.log( `${ category }: ${ message }` );
 }

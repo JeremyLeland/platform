@@ -75,12 +75,12 @@ export class Line {
     // If point 1 and point 2 are on different sides of line, then use normal
     // If they are on same side, then use closest point
     
-    if ( u1 <= 0 && u2 <= 0 ) {
+    if ( u1 <= 0 + EPSILON && u2 <= 0 + EPSILON ) {
       return this.getNormalAngle() - Math.PI / 2;
       // return u1 < u2 ? Math.atan2( y2 - this.y1, x2 - this.x1 ) : 
       //                  Math.atan2( y1 - this.y1, x1 - this.x1 );
     }
-    else if ( 1 <= u1 && 1 <= u2 ) {
+    else if ( 1 - EPSILON <= u1 && 1 - EPSILON <= u2 ) {
       return this.getNormalAngle() + Math.PI / 2;
       // return u1 < u2 ? Math.atan2( y1 - this.y2, x1 - this.x2 ) :
       //                  Math.atan2( y2 - this.y2, y2 - this.x2 );
@@ -140,13 +140,25 @@ export class Line {
     // Case where horizontal line is moving away from edge of vertical line:
     //   Try using angle to point, which is normal unless point is closer to edges (then its angle from edge to point)
     const normalAngle = this.getAngleToLine( x1, y1, x2, y2 );
+
+    
     const normX = Math.cos( normalAngle );
     const normY = Math.sin( normalAngle );
     
-
+    
     const vDotN = dx * normX + dy * normY;
+    
+
+    // Normal angle for bottom bound vs left line is:
+    //   - Free and clear: 4.71238898038469
+    //      - normX: -1.8369701987210297e-16
+    //      - normY: -1
+    //   - Slight overlap: 3.141592653589793
+    //      - normX: -1
+    //      - normY: 1.2246467991473532e-16
 
     // if ( vDotN != 0 ) {
+    //   console.log( 'normalAngle = ' + normalAngle );
     //   console.log( 'vDotN = ' + vDotN );
     // }
 
