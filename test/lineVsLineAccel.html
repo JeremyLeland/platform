@@ -7,15 +7,15 @@ import { Canvas } from '../src/common/Canvas.js';
 import { Line } from '../src/common/Line.js';
 import { ValuesPanel } from '../src/common/ValuesPanel.js';
 
-const line = new Line( 8, 3, 8, 4 );
+const line = new Line( -1, 5, 1, 5 );
 
 const vars = {
-  x1: 6,
-  y1: 3,
-  x2: 9,
-  y2: 3,
-  vx: 0,
-  vy: -0.1,
+  x1: 0,
+  y1: 5,
+  x2: 2,
+  y2: 5,
+  vx: 0.1,
+  vy: 0,
   ax: 0,
   ay: 0.004,
 }
@@ -71,6 +71,8 @@ canvas.draw = ( ctx ) => {
 
   // Find hit
   const hitTime = line.timeToHitLine( vars.x1, vars.y1, vars.x2, vars.y2, vars.vx, vars.vy, vars.ax, vars.ay );
+
+  console.log( hitTime );
 
   ctx.beginPath();
   [ [ vars.x1, vars.y1 ], [ vars.x2, vars.y2 ] ].forEach( p => {

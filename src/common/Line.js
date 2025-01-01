@@ -136,14 +136,13 @@ export class Line {
     // const normalAngle = this.getNormalAngle();
 
     
+    // Don't consider it a hit if we are moving away
+    // Case where horizontal line is moving away from edge of vertical line:
+    //   Try using angle to point, which is normal unless point is closer to edges (then its angle from edge to point)
     const normalAngle = this.getAngleToLine( x1, y1, x2, y2 );
     const normX = Math.cos( normalAngle );
     const normY = Math.sin( normalAngle );
     
-    // Don't consider it a hit if we are moving away
-
-    // TODO: How about case where horizontal line is moving away from edge of vertical line?
-    //       Try using angle to point, which is normal unless point is closer to edges (then its angle from edge to point)
 
     const vDotN = dx * normX + dy * normY;
 
@@ -151,7 +150,7 @@ export class Line {
     //   console.log( 'vDotN = ' + vDotN );
     // }
 
-    if ( vDotN > 0 ) {
+    if ( vDotN > EPSILON ) {
       return Infinity;
     }
 

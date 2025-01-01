@@ -147,7 +147,7 @@ export class World {
 
           // console.log( `---Bounds ${ i } will hit line ${ JSON.stringify( line ) } at ${ time }` );
 
-          if ( -dt <= time && time < closestTime ) {
+          if ( 0 <= time && time < closestTime ) {
             closestLine = line;
             closestTime = time;
             closestBoundsIndex = i;
@@ -159,15 +159,8 @@ export class World {
       this.player.y += this.player.dy * closestTime + 0.5 * this.player.ay * closestTime ** 2;
       this.player.dx += this.player.ax * closestTime;
       this.player.dy += this.player.ay * closestTime;
-
-      // TODO: Often fall through. Why does going right guarentee we fall through? (but not left)
-      // NOTE: I think the sides of the bounding box are throwing this off. If the bottom is past
-      //       our goal, then it seems to use the top line's hit
-      //       Is this because we are returning the lowest positive hit time? Maybe we need to return both values, so we can recognize slight over-shoots
-      //       Or just include slight overshoots in the range of values returned?
-
+      
       if ( closestLine ) {
-
         // console.log( `Bounds ${ closestBoundsIndex } will hit line ${ JSON.stringify( closestLine ) } at ${ closestTime }` );
 
         this.player.dy = 0;
