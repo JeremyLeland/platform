@@ -11,13 +11,13 @@ const line = new Line( 4, 3, 4, 4 );
 
 const vars = {
   x1: 3,
-  y1: 5,
-  x2: 5,
+  y1: 3,
+  x2: 3,
   y2: 2,
-  vx: -0.2,
-  vy:  0.1,
+  vx: 0,
+  vy: 0,
   ax: 0,
-  ay: -0.001,
+  ay: 0,
 }
 
 new ValuesPanel( vars ).valueChanged = _ => canvas.redraw();
@@ -41,7 +41,7 @@ canvas.draw = ( ctx ) => {
 
 
   // Find overlap
-  const normalAngle = line.normalAngle();
+  const normalAngle = line.getNormalAngle();
   const normX = Math.cos( normalAngle );
   const normY = Math.sin( normalAngle );
 
@@ -128,7 +128,7 @@ function getOverlap( x1, y1, x2, y2, x3, y3, x4, y4 ) {
     const uA = ( ( x4 - x3 ) * ( y1 - y3 ) - ( y4 - y3 ) * ( x1 - x3 ) ) / D;
     const uB = ( ( x2 - x1 ) * ( y1 - y3 ) - ( y2 - y1 ) * ( x1 - x3 ) ) / D;
 
-    if ( 0 <= uB && uB <= 1 ) {
+    if ( 0 < uB && uB < 1 ) {
       return uA;
     }
   }

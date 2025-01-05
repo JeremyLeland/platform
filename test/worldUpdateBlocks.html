@@ -1,4 +1,4 @@
-<title>Sweep test world update</title>
+<title>Block test world update</title>
 <link rel="stylesheet" href="../style.css">
 
 <script type="module">
@@ -24,7 +24,7 @@
   canvas.scrollY = -5;
 
   canvas.update = ( dt ) => {
-    world.updateSweep( dt );
+    world.updateBlocks( dt );
 
     // TODO: Update scroll to center player
     canvas.scrollX = world.player.x - 5;

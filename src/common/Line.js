@@ -221,13 +221,17 @@ export class Line {
 }
 
 function getLineOverlap( x1, y1, x2, y2, x3, y3, x4, y4 ) {
+  console.log( `getLineOverlap( ${ x1 }, ${ y1 }, ${ x2 }, ${ y2 } )` );
+
   const D = ( y4 - y3 ) * ( x2 - x1 ) - ( x4 - x3 ) * ( y2 - y1 );
 
   if ( D != 0 ) {
     const uA = ( ( x4 - x3 ) * ( y1 - y3 ) - ( y4 - y3 ) * ( x1 - x3 ) ) / D;
     const uB = ( ( x2 - x1 ) * ( y1 - y3 ) - ( y2 - y1 ) * ( x1 - x3 ) ) / D;
 
-    if ( 0 <= uB && uB <= 1 ) {
+    // Excluding 0 and 1 so a line sitting on the top is not detected as crossing the bottom
+    if ( 0 < uB && uB < 1 ) {
+      console.log( uA );
       return uA;
     }
   }
@@ -237,6 +241,7 @@ function getLineOverlap( x1, y1, x2, y2, x3, y3, x4, y4 ) {
   //   // Seems like I still get an overlap from the line in this case, so maybe it's ok to just return infinity
   // }
 
+  console.log( Infinity );
   return Infinity;
 }
 

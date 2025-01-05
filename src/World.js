@@ -10,6 +10,15 @@ export const Constants = {
   },
 }
 
+const Direction = {
+  Up: 0,
+  Left: 1,
+  Down: 2,
+  Right: 3,
+};
+
+const EPSILON = 1e-6;
+
 export class World {
   player = {
     x: 0,
@@ -33,20 +42,34 @@ export class World {
     this.#level = level;
 
     level.blocks.forEach( b => {
-      this.#lines.push( 
+
+      // b.#lines = Array( 4 );
+
+      // b.#lines[ Direction.Up ] = new Line( b.bounds[ 0 ], b.bounds[ 1 ], b.bounds[ 2 ] + 1, b.bounds[ 1 ] );
+
+      this.#lines.push(
         new Line( b.bounds[ 0 ], b.bounds[ 1 ], b.bounds[ 2 ] + 1, b.bounds[ 1 ] ) 
       );
 
       if ( b.type == 'stoneBrick' ) {
+
         this.#lines.push( 
           new Line( b.bounds[ 2 ] + 1, b.bounds[ 1 ], b.bounds[ 2 ] + 1, b.bounds[ 3 ] + 1 ) 
         );
+
+        // b.#lines[ Direction.Right ] = new Line( b.bounds[ 2 ] + 1, b.bounds[ 1 ], b.bounds[ 2 ] + 1, b.bounds[ 3 ] + 1 );
+
         this.#lines.push( 
           new Line( b.bounds[ 2 ] + 1, b.bounds[ 3 ] + 1, b.bounds[ 0 ], b.bounds[ 3 ] + 1 )
         );
+
+        // b.#lines[ Direction.Down ] = new Line( b.bounds[ 2 ] + 1, b.bounds[ 3 ] + 1, b.bounds[ 0 ], b.bounds[ 3 ] + 1 );
+
         this.#lines.push( 
           new Line( b.bounds[ 0 ], b.bounds[ 3 ] + 1, b.bounds[ 0 ], b.bounds[ 1 ] ) 
         );
+
+        // b.#lines[ Direction.Left ] = new Line( b.bounds[ 0 ], b.bounds[ 3 ] + 1, b.bounds[ 0 ], b.bounds[ 1 ] );
       }
     } );
   }
@@ -55,6 +78,77 @@ export class World {
     // TODO: Figure out best method below
   }
 
+  //
+  // Just do it based on the blocks, forget the general case
+  //
+
+  updateBlocks( dt ) {
+    this.player.ax = 0;
+    this.player.ay = Constants.Gravity;
+
+    this.player.x += this.player.dx * dt + 0.5 * this.player.ax * dt ** 2;
+    this.player.y += this.player.dy * dt + 0.5 * this.player.ay * dt ** 2;
+    this.player.dx += this.player.ax * dt;
+    this.player.dy += this.player.ay * dt;
+
+    const left = Math.floor( this.player.x - 0.5 );
+    const right = Math.floor( this.player.x + 0.5 );
+
+    const top = Math.floor( this.player.y - 0.5 );
+    const bottom = Math.floor( this.player.y + 0.5 );
+
+    for ( let x = left; x <= right; x ++ ) {
+      const y = bottom;
+
+      const block = this.#level.blocks.find( b => 
+        b.bounds[ 0 ] <= x && x <= b.bounds[ 2 ] &&
+        b.bounds[ 1 ] <= y && y <= b.bounds[ 3 ]
+      );
+
+      if ( block ) {
+        console.log( `Found ${ JSON.stringify( block ) } at ${ x },${ y }` );
+        this.player.y = y - 0.5;
+        this.player.dy = 0;
+        this.player.ay = 0;
+      }
+    }
+
+    if ( this.player.dx < 0 ) {
+      for ( let y = top; y < bottom; y ++ ) {
+        const x = left;
+
+        const block = this.#level.blocks.find( b => 
+          b.bounds[ 0 ] <= x && x <= b.bounds[ 2 ] &&
+          b.bounds[ 1 ] <= y && y <= b.bounds[ 3 ]
+        );
+
+        if ( block ) {
+          console.log( `Found ${ JSON.stringify( block ) } at ${ x },${ y }` );
+          this.player.x = x + 1.5;
+          this.player.dx = 0;
+          this.player.ax = 0;
+        }
+      }
+    }
+
+    if ( this.player.dx > 0 ) {
+      for ( let y = top; y < bottom; y ++ ) {
+        const x = right;
+
+        const block = this.#level.blocks.find( b => 
+          b.bounds[ 0 ] <= x && x <= b.bounds[ 2 ] &&
+          b.bounds[ 1 ] <= y && y <= b.bounds[ 3 ]
+        );
+
+        if ( block ) {
+          console.log( `Found ${ JSON.stringify( block ) } at ${ x },${ y }` );
+          this.player.x = x - 0.5;
+          this.player.dx = 0;
+          this.player.ax = 0;
+        }
+      }
+    }
+  }
 
   //
   // Try overlap tests to move player out of collisions with ground
@@ -69,45 +163,64 @@ export class World {
     this.player.dx += this.player.ax * dt;
     this.player.dy += this.player.ay * dt;
 
-    // TODO: These names are terribly confusing. Need a better term for this. LineDistance?
-    let leastOverlap = -Infinity, leastLine = null;
+    for ( let tries = 0; tries < 5; tries ++ ) {
+      // TODO: These names are terribly confusing. Need a better term for this. LineDistance?
+      let leastOverlap = -Infinity, leastLine = null;
 
-    this.#lines.forEach( line => {
-      let worstOverlap = Infinity;
+      
 
-      for ( let i = 0; i < this.player.bounds.length; i ++ ) {
-        const current = this.player.bounds[ i ];
-        const next = this.player.bounds[ ( i + 1 ) % this.player.bounds.length ];
+      this.#lines.forEach( line => {
+        console.log( JSON.stringify( line ) );
 
-        const overlap = line.getOverlap( 
-          this.player.x + current[ 0 ], 
-          this.player.y + current[ 1 ], 
-          this.player.x + next[ 0 ], 
-          this.player.y + next[ 1 ],
-        );
+        let worstOverlap = 0; //Infinity;
 
-        if ( -1 <= overlap && overlap < worstOverlap ) {
-          worstOverlap = Math.min( overlap, worstOverlap );
+        for ( let i = 0; i < this.player.bounds.length; i ++ ) {
+          const current = this.player.bounds[ i ];
+          const next = this.player.bounds[ ( i + 1 ) % this.player.bounds.length ];
+
+          const overlap = line.getOverlap( 
+            this.player.x + current[ 0 ], 
+            this.player.y + current[ 1 ], 
+            this.player.x + next[ 0 ], 
+            this.player.y + next[ 1 ],
+          );
+
+          if ( -1 <= overlap && overlap < worstOverlap ) {
+            worstOverlap = Math.min( overlap, worstOverlap );
+          }
+        }
+        
+        if ( leastOverlap < worstOverlap && worstOverlap < 0) {
+          leastOverlap = worstOverlap;
+          leastLine = line;
+        }
+      } );
+
+      if ( leastOverlap > -Infinity ) {
+
+        // if ( tries > 0 ) {
+        //   debugger;
+        // }
+
+        const normalAngle = leastLine.getNormalAngle();
+        const normX = Math.cos( normalAngle );
+        const normY = Math.sin( normalAngle );
+
+        this.player.x -= normX * leastOverlap;
+        this.player.y -= normY * leastOverlap;
+
+        // TODO: Base on slope?
+        if ( Math.abs( normX ) > EPSILON ) {
+          this.player.dx = 0;
+        }
+
+        if ( Math.abs( normY ) > EPSILON ) {
+          this.player.dy = 0;
         }
       }
-      
-      if ( leastOverlap < worstOverlap && worstOverlap < 0) {
-        leastOverlap = worstOverlap;
-        leastLine = line;
+      else {
+        break;
       }
-    } );
-
-    if ( leastOverlap > -Infinity ) {
-      const normalAngle = leastLine.getNormalAngle();
-      const normX = Math.cos( normalAngle );
-      const normY = Math.sin( normalAngle );
-
-      this.player.x -= normX * leastOverlap;
-      this.player.y -= normY * leastOverlap;
-
-      // TODO: Base on normal
-      // this.player.dx = 0;
-      this.player.dy = 0;
     }
   }
 
@@ -127,6 +240,9 @@ export class World {
       log( 'collision', JSON.stringify( this.player ) );
 
       let closestLine = null, closestTime = dt, closestBoundsIndex = -1;
+
+      // TODO: What if we only checked the bounds in the direction we are moving?
+      //       e.g. bottom vs top, left vs right
 
       this.#lines.filter( line => !skipLines.has( line ) ).forEach( line => {
 
@@ -163,8 +279,34 @@ export class World {
       if ( closestLine ) {
         log( 'collision', `Bounds ${ closestBoundsIndex } will hit line ${ JSON.stringify( closestLine ) } at ${ closestTime }` );
 
-        this.player.dy = 0;
-        this.player.ay = 0;
+        // TODO: Base on normal (so we don't stick to ceiling)
+        const b1 = this.player.bounds[ closestBoundsIndex ];
+        const b2 = this.player.bounds[ ( closestBoundsIndex + 1 ) % this.player.bounds.length ];
+        const normalAngle = closestLine.getAngleToLine( 
+          this.player.x + b1[ 0 ], 
+          this.player.y + b1[ 1 ], 
+          this.player.x + b2[ 0 ],
+          this.player.y + b2[ 1 ],
+        );
+        const normX = Math.cos( normalAngle );
+        const normY = Math.sin( normalAngle );
+
+        // console.log( `normX = ${ normX }, normY = ${ normY }` );
+
+        // TODO: Base this on difference between normals? (so top bound won't collide top of block)
+
+        // Attempting to stop properly based on normal
+        if ( normY == -1 ) {
+          this.player.dy = 0;
+          this.player.ay = 0;
+        }
+        else if ( normY == 1 ) {
+          this.player.dy = 0;
+        }
+        else {
+          this.player.dx = 0;
+          this.player.ax = 0;
+        }
 
         skipLines.add( closestLine );
       }

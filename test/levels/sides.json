@@ -1,0 +1,40 @@
+{
+  "blocks": [
+    {
+      "type": "stoneBrick",
+      "bounds": [
+        -6,
+        1,
+        -4,
+        2
+      ]
+    },
+    {
+      "type": "stoneBrick",
+      "bounds": [
+        4,
+        1,
+        6,
+        2
+      ]
+    },
+    {
+      "type": "stoneBrick",
+      "bounds": [
+        -9,
+        3,
+        8,
+        3
+      ]
+    },
+    {
+      "type": "stoneBrick",
+      "bounds": [
+        -1,
+        0,
+        1,
+        0
+      ]
+    }
+  ]
+}
