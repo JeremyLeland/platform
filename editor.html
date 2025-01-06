@@ -82,7 +82,7 @@
       const bounds = editorState.level.blocks[ editorState.selectedIndex ].bounds;
 
       ctx.fillStyle = '#fffa';
-      ctx.fillRect( bounds[ 0 ], bounds[ 1 ], bounds[ 2 ] + 1 - bounds[ 0 ], bounds[ 3 ] + 1 - bounds[ 1 ] );
+      ctx.fillRect( bounds[ 0 ] - 0.5, bounds[ 1 ] - 0.5, bounds[ 2 ] + 1 - bounds[ 0 ], bounds[ 3 ] + 1 - bounds[ 1 ] );
     }
     
     if ( editorState.options.grid ) {
@@ -105,7 +105,7 @@
         for ( let row = -GRID_H; row <= GRID_H; row ++ ) {
           ctx.save(); {
             for ( let col = -GRID_W; col <= GRID_W; col ++ ) {
-              ctx.fillText( `(${ col },${ row })`, 0.5, 0.5 );
+              ctx.fillText( `(${ col },${ row })`, 0, 0 );
               ctx.translate( 1, 0 );
             }
           }
@@ -123,13 +123,13 @@
     const grid = new Path2D();
 
     for ( let col = minX; col <= maxX + 1; col ++ ) {
-      grid.moveTo( col, minY );
-      grid.lineTo( col, maxY + 1 );
+      grid.moveTo( col - 0.5, minY - 0.5 );
+      grid.lineTo( col - 0.5, maxY + 0.5 );
     }
 
     for ( let row = minY; row <= maxY + 1; row ++ ) {
-      grid.moveTo( minX, row );
-      grid.lineTo( maxX + 1, row );
+      grid.moveTo( minX - 0.5, row - 0.5 );
+      grid.lineTo( maxX + 0.5, row - 0.5 );
     }
 
     return grid;
@@ -215,15 +215,15 @@
   canvas.pointerDown = ( p ) => {
     if ( p.buttons == 1 ) {
       const underPointerIndex = editorState.level.blocks.findLastIndex( block => 
-        block.bounds[ 0 ] <= p.x && p.x <= block.bounds[ 2 ] + 1 &&
-        block.bounds[ 1 ] <= p.y && p.y <= block.bounds[ 3 ] + 1
+        block.bounds[ 0 ] - 0.5 <= p.x && p.x <= block.bounds[ 2 ] + 0.5 &&
+        block.bounds[ 1 ] - 0.5 <= p.y && p.y <= block.bounds[ 3 ] + 0.5
       );
 
       // If we click in an empty spot, deselect first. 
       // If no selection, add a block here
       if ( underPointerIndex == -1 ) {
         if ( editorState.selectedIndex < 0 ) {
-          addBlock( Math.floor( p.x ), Math.floor( p.y ) );
+          addBlock( Math.round( p.x ), Math.round( p.y ) );
         }
         else {
           editorState.selectedIndex = -1;
@@ -233,8 +233,8 @@
         editorState.selectedIndex = underPointerIndex;
       }
 
-      lastCol = Math.floor( p.x );
-      lastRow = Math.floor( p.y );
+      lastCol = Math.round( p.x );
+      lastRow = Math.round( p.y );
     }
     else if ( p.buttons == 2 ) {
       if ( editorState.selectedIndex < 0 ) {
@@ -256,8 +256,8 @@
       return;
     }
 
-    const col = Math.floor( p.x );
-    const row = Math.floor( p.y );
+    const col = Math.round( p.x );
+    const row = Math.round( p.y );
     
     const dx = col - lastCol;
     const dy = row - lastRow;

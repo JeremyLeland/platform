@@ -22,7 +22,7 @@ const EPSILON = 1e-6;
 export class World {
   player = {
     x: 0,
-    y: 0,
+    y: -3,
     dx: 0,
     dy: 0,
     ax: 0,
@@ -42,34 +42,17 @@ export class World {
     this.#level = level;
 
     level.blocks.forEach( b => {
+      const left   = b.bounds[ 0 ] - 0.5;
+      const top    = b.bounds[ 1 ] - 0.5;
+      const right  = b.bounds[ 2 ] + 0.5;
+      const bottom = b.bounds[ 3 ] + 0.5;
 
-      // b.#lines = Array( 4 );
-
-      // b.#lines[ Direction.Up ] = new Line( b.bounds[ 0 ], b.bounds[ 1 ], b.bounds[ 2 ] + 1, b.bounds[ 1 ] );
-
-      this.#lines.push(
-        new Line( b.bounds[ 0 ], b.bounds[ 1 ], b.bounds[ 2 ] + 1, b.bounds[ 1 ] ) 
-      );
+      this.#lines.push( new Line( left, top, right, top ) );
 
       if ( b.type == 'stoneBrick' ) {
-
-        this.#lines.push( 
-          new Line( b.bounds[ 2 ] + 1, b.bounds[ 1 ], b.bounds[ 2 ] + 1, b.bounds[ 3 ] + 1 ) 
-        );
-
-        // b.#lines[ Direction.Right ] = new Line( b.bounds[ 2 ] + 1, b.bounds[ 1 ], b.bounds[ 2 ] + 1, b.bounds[ 3 ] + 1 );
-
-        this.#lines.push( 
-          new Line( b.bounds[ 2 ] + 1, b.bounds[ 3 ] + 1, b.bounds[ 0 ], b.bounds[ 3 ] + 1 )
-        );
-
-        // b.#lines[ Direction.Down ] = new Line( b.bounds[ 2 ] + 1, b.bounds[ 3 ] + 1, b.bounds[ 0 ], b.bounds[ 3 ] + 1 );
-
-        this.#lines.push( 
-          new Line( b.bounds[ 0 ], b.bounds[ 3 ] + 1, b.bounds[ 0 ], b.bounds[ 1 ] ) 
-        );
-
-        // b.#lines[ Direction.Left ] = new Line( b.bounds[ 0 ], b.bounds[ 3 ] + 1, b.bounds[ 0 ], b.bounds[ 1 ] );
+        this.#lines.push( new Line( right, top, right, bottom ) );
+        this.#lines.push( new Line( right, bottom, left, bottom ) );
+        this.#lines.push( new Line( left, bottom, left, top ) );
       }
     } );
   }
@@ -91,14 +74,14 @@ export class World {
     this.player.dx += this.player.ax * dt;
     this.player.dy += this.player.ay * dt;
 
-    const left = Math.floor( this.player.x - 0.5 );
-    const right = Math.floor( this.player.x + 0.5 );
+    const left = Math.round( this.player.x - 0.5 );
+    const right = Math.round( this.player.x + 0.5 );
 
-    const top = Math.floor( this.player.y - 0.5 );
-    const bottom = Math.floor( this.player.y + 0.5 );
+    const top = Math.round( this.player.y - 0.5 );
+    const bottom = Math.round( this.player.y + 0.5 );
 
     if ( this.player.dy < 0 ) {
-      for ( let x = left; x < right; x ++ ) {
+      for ( let x = left; x <= right; x ++ ) {
         const y = top;
         
         const block = this.#level.blocks.find( b => 
@@ -107,8 +90,8 @@ export class World {
         );
         
         if ( block ) {
-          console.log( `Found ${ JSON.stringify( block ) } at ${ x },${ y }` );
-          this.player.y = y + 1.5;
+          // console.log( `Found ${ JSON.stringify( block ) } at ${ x },${ y }` );
+          this.player.y = y + 1;
           this.player.dy = 0;
           this.player.ay = 0;
         }
@@ -116,7 +99,7 @@ export class World {
     }
 
     if ( this.player.dy > 0 ) {
-      for ( let x = left; x < right; x ++ ) {
+      for ( let x = left; x <= right; x ++ ) {
         const y = bottom;
         
         const block = this.#level.blocks.find( b => 
@@ -125,8 +108,8 @@ export class World {
         );
         
         if ( block ) {
-          console.log( `Found ${ JSON.stringify( block ) } at ${ x },${ y }` );
-          this.player.y = y - 0.5;
+          // console.log( `Found ${ JSON.stringify( block ) } at ${ x },${ y }` );
+          this.player.y = y - 1;
           this.player.dy = 0;
           this.player.ay = 0;
         }
@@ -143,8 +126,8 @@ export class World {
         );
 
         if ( block ) {
-          console.log( `Found ${ JSON.stringify( block ) } at ${ x },${ y }` );
-          this.player.x = x + 1.5;
+          // console.log( `Found ${ JSON.stringify( block ) } at ${ x },${ y }` );
+          this.player.x = x + 1;
           this.player.dx = 0;
           this.player.ax = 0;
         }
@@ -161,8 +144,8 @@ export class World {
         );
 
         if ( block ) {
-          console.log( `Found ${ JSON.stringify( block ) } at ${ x },${ y }` );
-          this.player.x = x - 0.5;
+          // console.log( `Found ${ JSON.stringify( block ) } at ${ x },${ y }` );
+          this.player.x = x - 1;
           this.player.dx = 0;
           this.player.ax = 0;
         }

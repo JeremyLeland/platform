@@ -17,7 +17,7 @@ export const Styles = {
 
 export function draw( ctx, block, time = 0 ) {
 
-  let offsetX = 0, offsetY = 0;
+  let offsetX = -0.5, offsetY = -0.5;
 
   if ( block.waypoints ) {
     const totalTime = block.waypoints[ block.waypoints.length - 1 ].time;
@@ -34,8 +34,8 @@ export function draw( ctx, block, time = 0 ) {
 
     const partialTime = ( loopTime - prevWaypoint.time ) / ( nextWaypoint.time - prevWaypoint.time );
 
-    offsetX = prevWaypoint.offset[ 0 ] + ( nextWaypoint.offset[ 0 ] - prevWaypoint.offset[ 0 ] ) * partialTime;
-    offsetY = prevWaypoint.offset[ 1 ] + ( nextWaypoint.offset[ 1 ] - prevWaypoint.offset[ 1 ] ) * partialTime;
+    offsetX += prevWaypoint.offset[ 0 ] + ( nextWaypoint.offset[ 0 ] - prevWaypoint.offset[ 0 ] ) * partialTime;
+    offsetY += prevWaypoint.offset[ 1 ] + ( nextWaypoint.offset[ 1 ] - prevWaypoint.offset[ 1 ] ) * partialTime;
   }
 
   ctx.translate( offsetX, offsetY );
