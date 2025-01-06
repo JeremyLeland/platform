@@ -97,19 +97,39 @@ export class World {
     const top = Math.floor( this.player.y - 0.5 );
     const bottom = Math.floor( this.player.y + 0.5 );
 
-    for ( let x = left; x <= right; x ++ ) {
-      const y = bottom;
+    if ( this.player.dy < 0 ) {
+      for ( let x = left; x < right; x ++ ) {
+        const y = top;
+        
+        const block = this.#level.blocks.find( b => 
+          b.bounds[ 0 ] <= x && x <= b.bounds[ 2 ] &&
+          b.bounds[ 1 ] <= y && y <= b.bounds[ 3 ]
+        );
+        
+        if ( block ) {
+          console.log( `Found ${ JSON.stringify( block ) } at ${ x },${ y }` );
+          this.player.y = y + 1.5;
+          this.player.dy = 0;
+          this.player.ay = 0;
+        }
+      }
+    }
 
-      const block = this.#level.blocks.find( b => 
-        b.bounds[ 0 ] <= x && x <= b.bounds[ 2 ] &&
-        b.bounds[ 1 ] <= y && y <= b.bounds[ 3 ]
-      );
-
-      if ( block ) {
-        console.log( `Found ${ JSON.stringify( block ) } at ${ x },${ y }` );
-        this.player.y = y - 0.5;
-        this.player.dy = 0;
-        this.player.ay = 0;
+    if ( this.player.dy > 0 ) {
+      for ( let x = left; x < right; x ++ ) {
+        const y = bottom;
+        
+        const block = this.#level.blocks.find( b => 
+          b.bounds[ 0 ] <= x && x <= b.bounds[ 2 ] &&
+          b.bounds[ 1 ] <= y && y <= b.bounds[ 3 ]
+        );
+        
+        if ( block ) {
+          console.log( `Found ${ JSON.stringify( block ) } at ${ x },${ y }` );
+          this.player.y = y - 0.5;
+          this.player.dy = 0;
+          this.player.ay = 0;
+        }
       }
     }
 

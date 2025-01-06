@@ -3,18 +3,18 @@
     {
       "type": "stoneBrick",
       "bounds": [
-        -6,
+        -9,
         1,
-        -4,
+        -7,
         2
       ]
     },
     {
       "type": "stoneBrick",
       "bounds": [
-        4,
+        7,
         1,
-        6,
+        9,
         2
       ]
     },
@@ -23,7 +23,7 @@
       "bounds": [
         -9,
         3,
-        8,
+        9,
         3
       ]
     },
@@ -34,6 +34,24 @@
         0,
         1,
         0
+      ]
+    },
+    {
+      "type": "stoneBrick",
+      "bounds": [
+        -6,
+        1,
+        -5,
+        1
+      ]
+    },
+    {
+      "type": "stoneBrick",
+      "bounds": [
+        5,
+        1,
+        6,
+        1
       ]
     }
   ]
