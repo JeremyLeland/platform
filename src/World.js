@@ -74,82 +74,82 @@ export class World {
     this.player.dx += this.player.ax * dt;
     this.player.dy += this.player.ay * dt;
 
-    const left = Math.round( this.player.x - 0.5 );
-    const right = Math.round( this.player.x + 0.5 );
 
-    const top = Math.round( this.player.y - 0.5 );
-    const bottom = Math.round( this.player.y + 0.5 );
-
+    // TODO: Combine below somehow
     if ( this.player.dy < 0 ) {
-      for ( let x = left; x <= right; x ++ ) {
-        const y = top;
+      [ -0.49, 0.49 ].forEach( xOffset => {
+        const x = this.player.x + xOffset;
+        const y = this.player.y - 0.5;
         
         const block = this.#level.blocks.find( b => 
-          b.bounds[ 0 ] <= x && x <= b.bounds[ 2 ] &&
-          b.bounds[ 1 ] <= y && y <= b.bounds[ 3 ]
+          b.bounds[ 0 ] - 0.5 <= x && x <= b.bounds[ 2 ] + 0.5 &&
+          b.bounds[ 1 ] - 0.5 <= y && y <= b.bounds[ 3 ] + 0.5
         );
         
         if ( block ) {
           // console.log( `Found ${ JSON.stringify( block ) } at ${ x },${ y }` );
-          this.player.y = y + 1;
+          this.player.y = Math.floor( y ) + 1;
           this.player.dy = 0;
           this.player.ay = 0;
         }
-      }
+      } );
     }
 
     if ( this.player.dy > 0 ) {
-      for ( let x = left; x <= right; x ++ ) {
-        const y = bottom;
+      [ -0.49, 0.49 ].forEach( xOffset => {
+        const x = this.player.x + xOffset;
+        const y = this.player.y + 0.5;
         
         const block = this.#level.blocks.find( b => 
-          b.bounds[ 0 ] <= x && x <= b.bounds[ 2 ] &&
-          b.bounds[ 1 ] <= y && y <= b.bounds[ 3 ]
+          b.bounds[ 0 ] - 0.5 <= x && x <= b.bounds[ 2 ] + 0.5 &&
+          b.bounds[ 1 ] - 0.5 <= y && y <= b.bounds[ 3 ] + 0.5
         );
         
         if ( block ) {
           // console.log( `Found ${ JSON.stringify( block ) } at ${ x },${ y }` );
-          this.player.y = y - 1;
+          this.player.y = Math.ceil( y ) - 1;
           this.player.dy = 0;
           this.player.ay = 0;
         }
-      }
+      } );
     }
 
     if ( this.player.dx < 0 ) {
-      for ( let y = top; y < bottom; y ++ ) {
-        const x = left;
+      [ -0.49, 0.49 ].forEach( yOffset => {
+        const x = this.player.x - 0.5;
+        const y = this.player.y + yOffset;
 
         const block = this.#level.blocks.find( b => 
-          b.bounds[ 0 ] <= x && x <= b.bounds[ 2 ] &&
-          b.bounds[ 1 ] <= y && y <= b.bounds[ 3 ]
+          b.bounds[ 0 ] - 0.5 <= x && x <= b.bounds[ 2 ] + 0.5 &&
+          b.bounds[ 1 ] - 0.5 <= y && y <= b.bounds[ 3 ] + 0.5
         );
 
         if ( block ) {
           // console.log( `Found ${ JSON.stringify( block ) } at ${ x },${ y }` );
-          this.player.x = x + 1;
+          this.player.x = Math.floor( x ) + 1;
           this.player.dx = 0;
           this.player.ax = 0;
         }
-      }
+      } );
     }
 
     if ( this.player.dx > 0 ) {
-      for ( let y = top; y < bottom; y ++ ) {
-        const x = right;
+      [ -0.49, 0.49 ].forEach( yOffset => {
+        const x = this.player.x + 0.5;
+        const y = this.player.y + yOffset;
 
         const block = this.#level.blocks.find( b => 
-          b.bounds[ 0 ] <= x && x <= b.bounds[ 2 ] &&
-          b.bounds[ 1 ] <= y && y <= b.bounds[ 3 ]
+          b.bounds[ 0 ] - 0.5 <= x && x <= b.bounds[ 2 ] + 0.5 &&
+          b.bounds[ 1 ] - 0.5 <= y && y <= b.bounds[ 3 ] + 0.5
         );
 
         if ( block ) {
           // console.log( `Found ${ JSON.stringify( block ) } at ${ x },${ y }` );
-          this.player.x = x - 1;
+          this.player.x = Math.ceil( x ) - 1;
           this.player.dx = 0;
           this.player.ax = 0;
         }
-      }
+      } );
     }
   }
 
@@ -347,6 +347,8 @@ export class World {
     ctx.translate( -this.player.x, -this.player.y );
   }
 
+  // TODO: Continue to apply left and right 
+  // (so they will take effect if we jump over an obstacle that was preventing movement)
   keyDown( e ) {
     if ( e.key == ' ' ) {
       this.player.dy = -Constants.Player.Jump;
