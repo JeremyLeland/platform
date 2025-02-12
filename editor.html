@@ -86,7 +86,7 @@
     }
     
     if ( editorState.options.grid ) {
-      const GRID_W = 20, GRID_H = 10;
+      const GRID_W = 40, GRID_H = 10;
       // Make it look like:
       // + - - +
       // |     |
@@ -242,8 +242,8 @@
       }
 
       const block = editorState.level.blocks[ editorState.selectedIndex ];
-      const midX = ( block.bounds[ 0 ] + block.bounds[ 2 ] + 1 ) / 2;
-      const midY = ( block.bounds[ 1 ] + block.bounds[ 3 ] + 1 ) / 2;
+      const midX = ( block.bounds[ 0 ] + block.bounds[ 2 ] ) / 2;
+      const midY = ( block.bounds[ 1 ] + block.bounds[ 3 ] ) / 2;
 
       resizeMode = ( p.x < midX ) << 3 | ( p.y < midY ) << 2 | ( p.x > midX ) << 1 | ( p.y > midY );
     }
@@ -375,7 +375,7 @@
   //
 
   const buttonActions = {
-    'play': ( e ) => {
+    'play': _ => {
       // if ( mode == Mode.Edit ) {
       //   mode = Mode.Play;
       //   document.getElementById( 'play' ).innerText = 'Edit';
@@ -391,16 +391,16 @@
       //   canvas.redraw();
       // }
     },
-    'save': ( e ) => {
+    'save': _ => {
       alert( JSON.stringify( editorState.level ) );
     },
-    'load': ( e ) => {
+    'load': _ => {
       load( JSON.parse( prompt() ) );
     },
-    'undo': ( e ) => {
+    'undo': _ => {
       undo();
     },
-    'clear': ( e ) => {
+    'clear': _ => {
       editorState = newEditorState();
       canvas.redraw();
     }
