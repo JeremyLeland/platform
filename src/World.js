@@ -44,6 +44,12 @@ export class World {
   #level;
   #lines = [];
 
+  #inputFuncs = {
+    ' ':          b => this.input.jump = b,
+    'ArrowLeft':  b => this.input.left = b,
+    'ArrowRight': b => this.input.right = b,
+  }
+
   constructor( level ) {
     this.#level = level;
 
@@ -360,24 +366,11 @@ export class World {
   }
 
   keyDown( e ) {
-    if ( e.key == ' ' ) {
-      this.input.jump = true;
-    }
-    else if ( e.key == 'ArrowLeft' ) {
-      this.input.left = true;
-    }
-    else if ( e.key == 'ArrowRight' ) {
-      this.input.right = true;
-    }
+    this.#inputFuncs[ e.key ]?.( true );
   }
 
   keyUp( e ) {
-    if ( e.key == 'ArrowLeft' ) {
-      this.input.left = false;
-    }
-    else if ( e.key == 'ArrowRight' ) {
-      this.input.right = false;
-    }
+    this.#inputFuncs[ e.key ]?.( false );
   }
 }
 
