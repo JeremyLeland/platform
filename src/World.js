@@ -35,6 +35,12 @@ export class World {
     ],
   };
 
+  input = {
+    left: false,
+    right: false,
+    jump: false,
+  };
+
   #level;
   #lines = [];
 
@@ -69,51 +75,19 @@ export class World {
     this.player.ax = 0;
     this.player.ay = Constants.Gravity;
 
+    this.player.dx = this.input.left ? -Constants.Player.Move : this.input.right ? Constants.Player.Move : 0;
+
+    if ( this.input.jump ) {
+      this.player.dy = -Constants.Player.Jump;
+      this.input.jump = false;
+    }
+
     this.player.x += this.player.dx * dt + 0.5 * this.player.ax * dt ** 2;
     this.player.y += this.player.dy * dt + 0.5 * this.player.ay * dt ** 2;
     this.player.dx += this.player.ax * dt;
     this.player.dy += this.player.ay * dt;
 
-
     // TODO: Combine below somehow
-    if ( this.player.dy < 0 ) {
-      [ -0.49, 0.49 ].forEach( xOffset => {
-        const x = this.player.x + xOffset;
-        const y = this.player.y - 0.5;
-        
-        const block = this.#level.blocks.find( b => 
-          b.bounds[ 0 ] - 0.5 <= x && x <= b.bounds[ 2 ] + 0.5 &&
-          b.bounds[ 1 ] - 0.5 <= y && y <= b.bounds[ 3 ] + 0.5
-        );
-        
-        if ( block ) {
-          // console.log( `Found ${ JSON.stringify( block ) } at ${ x },${ y }` );
-          this.player.y = Math.floor( y ) + 1;
-          this.player.dy = 0;
-          this.player.ay = 0;
-        }
-      } );
-    }
-
-    if ( this.player.dy > 0 ) {
-      [ -0.49, 0.49 ].forEach( xOffset => {
-        const x = this.player.x + xOffset;
-        const y = this.player.y + 0.5;
-        
-        const block = this.#level.blocks.find( b => 
-          b.bounds[ 0 ] - 0.5 <= x && x <= b.bounds[ 2 ] + 0.5 &&
-          b.bounds[ 1 ] - 0.5 <= y && y <= b.bounds[ 3 ] + 0.5
-        );
-        
-        if ( block ) {
-          // console.log( `Found ${ JSON.stringify( block ) } at ${ x },${ y }` );
-          this.player.y = Math.ceil( y ) - 1;
-          this.player.dy = 0;
-          this.player.ay = 0;
-        }
-      } );
-    }
-
     if ( this.player.dx < 0 ) {
       [ -0.49, 0.49 ].forEach( yOffset => {
         const x = this.player.x - 0.5;
@@ -148,6 +122,44 @@ export class World {
           this.player.x = Math.ceil( x ) - 1;
           this.player.dx = 0;
           this.player.ax = 0;
+        }
+      } );
+    }
+
+    if ( this.player.dy < 0 ) {
+      [ -0.49, 0.49 ].forEach( xOffset => {
+        const x = this.player.x + xOffset;
+        const y = this.player.y - 0.5;
+        
+        const block = this.#level.blocks.find( b => 
+          b.bounds[ 0 ] - 0.5 <= x && x <= b.bounds[ 2 ] + 0.5 &&
+          b.bounds[ 1 ] - 0.5 <= y && y <= b.bounds[ 3 ] + 0.5
+        );
+        
+        if ( block ) {
+          // console.log( `Found ${ JSON.stringify( block ) } at ${ x },${ y }` );
+          this.player.y = Math.floor( y ) + 1;
+          this.player.dy = 0;
+          this.player.ay = 0;
+        }
+      } );
+    }
+
+    if ( this.player.dy > 0 ) {
+      [ -0.49, 0.49 ].forEach( xOffset => {
+        const x = this.player.x + xOffset;
+        const y = this.player.y + 0.5;
+        
+        const block = this.#level.blocks.find( b => 
+          b.bounds[ 0 ] - 0.5 <= x && x <= b.bounds[ 2 ] + 0.5 &&
+          b.bounds[ 1 ] - 0.5 <= y && y <= b.bounds[ 3 ] + 0.5
+        );
+        
+        if ( block ) {
+          // console.log( `Found ${ JSON.stringify( block ) } at ${ x },${ y }` );
+          this.player.y = Math.ceil( y ) - 1;
+          this.player.dy = 0;
+          this.player.ay = 0;
         }
       } );
     }
@@ -347,23 +359,24 @@ export class World {
     ctx.translate( -this.player.x, -this.player.y );
   }
 
-  // TODO: Continue to apply left and right 
-  // (so they will take effect if we jump over an obstacle that was preventing movement)
   keyDown( e ) {
     if ( e.key == ' ' ) {
-      this.player.dy = -Constants.Player.Jump;
+      this.input.jump = true;
     }
     else if ( e.key == 'ArrowLeft' ) {
-      this.player.dx = -Constants.Player.Move;
+      this.input.left = true;
     }
     else if ( e.key == 'ArrowRight' ) {
-      this.player.dx =  Constants.Player.Move;
+      this.input.right = true;
     }
   }
 
   keyUp( e ) {
-    if ( e.key == 'ArrowLeft' || e.key == 'ArrowRight' ) {
-      this.player.dx = 0;
+    if ( e.key == 'ArrowLeft' ) {
+      this.input.left = false;
+    }
+    else if ( e.key == 'ArrowRight' ) {
+      this.input.right = false;
     }
   }
 }
