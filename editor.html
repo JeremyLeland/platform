@@ -32,6 +32,11 @@
       undoStack: [],
       selectedIndex: -1,
       activeBrush: Object.keys( Block.Styles )[ 0 ],
+      viewport: {
+        x: -5,
+        y: -5,
+        zoom: 1 / 10,
+      },
       options: {
         grid: true,
       }
@@ -71,10 +76,17 @@
   const canvas = new Canvas();
   canvas.backgroundColor = 'dodgerblue';
   canvas.lineWidth = 0.02;
-  canvas.zoom = 1 / 10;
-  canvas.scrollX = -5;
-  canvas.scrollY = -5;
 
+  function redraw() {
+    canvas.zoom = editorState.viewport.zoom;
+    canvas.scrollX = editorState.viewport.x;
+    canvas.scrollY = editorState.viewport.y;
+
+    canvas.redraw();
+  }
+
+  redraw();
+  
   canvas.draw = ( ctx ) => {
     editorState.level.blocks.forEach( block => Block.draw( ctx, block ) );
 
@@ -142,6 +154,8 @@
   function load( json ) {
     if ( json != null ) {
       editorState = newEditorState( json );
+
+      redraw();
     }
   }
 
@@ -203,7 +217,7 @@
       }
     }
 
-    canvas.redraw();
+    redraw();
   }
 
   //
@@ -248,7 +262,7 @@
       resizeMode = ( p.x < midX ) << 3 | ( p.y < midY ) << 2 | ( p.x > midX ) << 1 | ( p.y > midY );
     }
 
-    canvas.redraw();
+    redraw();
   }
 
   canvas.pointerMove = ( p ) => {
@@ -288,28 +302,34 @@
         changeBlockBounds( dBounds );
       }
 
-      canvas.redraw();
+      redraw();
     }
+  }
+
+  function zoom( viewport, x, y, amount ) {
+    viewport.x = x - ( x - viewport.x ) / amount;
+    viewport.y = y - ( y - viewport.y ) / amount;
+    viewport.zoom *= amount;
   }
 
   canvas.wheelInput = ( p ) => {
     if ( editorState.selectedIndex < 0 ) {
       if ( p.shiftKey ) {
-        canvas.scrollX -= Math.sign( p.wheel );
+        editorState.viewport.x -= Math.sign( p.wheel );
       }
       else if ( p.ctrlKey ) {
         const ZOOM_SPEED = 0.9;
-        canvas.zoomAt( p.x, p.y, p.wheel < 0 ? ZOOM_SPEED : 1 / ZOOM_SPEED );
+        zoom( editorState.viewport, p.x, p.y, p.wheel < 0 ? ZOOM_SPEED : 1 / ZOOM_SPEED );
       }
       else {
-        canvas.scrollY -= Math.sign( p.wheel );
+        editorState.viewport.y -= Math.sign( p.wheel );
       }
     }
     else {
       reorderBlock( Math.sign( p.wheel ) );
     }
 
-    canvas.redraw();
+    redraw();
   }
 
   //
@@ -367,7 +387,7 @@
       changeBlockBounds( dBounds );
     }
 
-    canvas.redraw();
+    redraw();
   } );
 
   //
@@ -388,7 +408,7 @@
       //   mode = Mode.Edit;
       //   document.getElementById( 'play' ).innerText = 'Play';
       //   world = null;
-      //   canvas.redraw();
+      //   redraw();
       // }
     },
     'save': _ => {
@@ -402,7 +422,7 @@
     },
     'clear': _ => {
       editorState = newEditorState();
-      canvas.redraw();
+      redraw();
     }
   }
 
