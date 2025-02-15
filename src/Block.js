@@ -2,16 +2,40 @@ export const Styles = {
   'lightBrick': {
     'grass': 'lime',
     'brick': 'tan',
+    solid: {
+      top: true,
+      left: false,
+      right: false,
+      bottom: false,
+    },
   },
   'darkBrick': {
     'grass': 'green',
     'brick': 'brown',
+    solid: {
+      top: true,
+      left: false,
+      right: false,
+      bottom: false,
+    },
   },
   'stoneBrick': {
     'brick': 'gray',
+    solid: {
+      top: true,
+      left: true,
+      right: true,
+      bottom: true,
+    },
   },
   'blueWater': {
     'water': '#00fa',
+    solid: {
+      top: false,
+      left: false,
+      right: false,
+      bottom: false,
+    },
   },
 };
 

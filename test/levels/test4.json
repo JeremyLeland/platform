@@ -1,0 +1,94 @@
+{
+  "blocks": [
+    {
+      "type": "lightBrick",
+      "bounds": [
+        19,
+        -1,
+        21,
+        -1
+      ]
+    },
+    {
+      "type": "lightBrick",
+      "bounds": [
+        -1,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "type": "lightBrick",
+      "bounds": [
+        -10,
+        1,
+        -8,
+        2
+      ]
+    },
+    {
+      "type": "lightBrick",
+      "bounds": [
+        -9,
+        3,
+        9,
+        3
+      ]
+    },
+    {
+      "type": "lightBrick",
+      "bounds": [
+        18,
+        4,
+        20,
+        4
+      ]
+    },
+    {
+      "type": "stoneBrick",
+      "bounds": [
+        -5,
+        1,
+        -4,
+        1
+      ]
+    },
+    {
+      "type": "stoneBrick",
+      "bounds": [
+        4,
+        1,
+        5,
+        1
+      ]
+    },
+    {
+      "type": "stoneBrick",
+      "bounds": [
+        8,
+        1,
+        10,
+        2
+      ]
+    },
+    {
+      "type": "lightBrick",
+      "bounds": [
+        13,
+        1,
+        15,
+        1
+      ]
+    },
+    {
+      "type": "lightBrick",
+      "bounds": [
+        23,
+        2,
+        25,
+        2
+      ]
+    }
+  ]
+}

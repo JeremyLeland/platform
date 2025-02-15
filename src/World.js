@@ -100,6 +100,7 @@ export class World {
         const y = this.player.y + yOffset;
 
         const block = this.#level.blocks.find( b => 
+          Block.Styles[ b.type ].solid.right &&
           b.bounds[ 0 ] - 0.5 <= x && x <= b.bounds[ 2 ] + 0.5 &&
           b.bounds[ 1 ] - 0.5 <= y && y <= b.bounds[ 3 ] + 0.5
         );
@@ -119,6 +120,7 @@ export class World {
         const y = this.player.y + yOffset;
 
         const block = this.#level.blocks.find( b => 
+          Block.Styles[ b.type ].solid.left &&
           b.bounds[ 0 ] - 0.5 <= x && x <= b.bounds[ 2 ] + 0.5 &&
           b.bounds[ 1 ] - 0.5 <= y && y <= b.bounds[ 3 ] + 0.5
         );
@@ -138,6 +140,7 @@ export class World {
         const y = this.player.y - 0.5;
         
         const block = this.#level.blocks.find( b => 
+          Block.Styles[ b.type ].solid.bottom &&
           b.bounds[ 0 ] - 0.5 <= x && x <= b.bounds[ 2 ] + 0.5 &&
           b.bounds[ 1 ] - 0.5 <= y && y <= b.bounds[ 3 ] + 0.5
         );
@@ -157,6 +160,7 @@ export class World {
         const y = this.player.y + 0.5;
         
         const block = this.#level.blocks.find( b => 
+          Block.Styles[ b.type ].solid.top &&
           b.bounds[ 0 ] - 0.5 <= x && x <= b.bounds[ 2 ] + 0.5 &&
           b.bounds[ 1 ] - 0.5 <= y && y <= b.bounds[ 3 ] + 0.5
         );
